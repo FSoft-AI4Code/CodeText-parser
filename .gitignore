@@ -1,0 +1,14 @@
+cache/*
+src/*/*.txt
+src/codetext.egg-info/*
+*/build/*
+*/dist/*
+*/tree-sitter-*
+*.jsonl
+*.json
+*.zip
+*.gz
+*.pyc
+*.so
+*.whl
+

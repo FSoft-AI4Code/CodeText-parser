@@ -1,0 +1,43 @@
+
+name: Publish package to PyPI
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  release:
+#    if: github.event_name == 'release' && github.event.action == 'created'
+    name: PyPi Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout repo
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - uses: actions/cache@v1
+      name: Cache pip dependencies
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Install pip dependencies
+      run: |
+         pip install --upgrade pip
+         pip install -r requirements.txt
+         python3 -m pip install --upgrade build twine wheel
+    - name: Make distribution
+      run: |
+        python3 setup.py sdist bdist_wheel
+        twine check dist/*
+    - name: Publish a Python distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_TOKEN }}
