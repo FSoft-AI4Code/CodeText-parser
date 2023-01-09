@@ -3,9 +3,8 @@ import os
 import unittest
 from pathlib import Path
 
-from tree_sitter import Language, Parser
-from codetext.parser import JavaParser
-from codetext.utils import parse_code
+from src.codetext.parser import JavaParser
+from src.codetext.utils import parse_code
 
 
 class Test_JavaParser(unittest.TestCase):

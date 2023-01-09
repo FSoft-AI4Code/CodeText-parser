@@ -114,8 +114,13 @@ class CppParser(LanguageParser):
         for child in function_node.children:
             if child.type == 'primitive_type':
                 metadata['type'] = match_from_span(child, blob)
-            elif child.type == 'function_declarator':
-                for subchild in child.children:
+                # search for "function_declarator"
+            fn_declarators = []
+            traverse_type(child, fn_declarators, 'function_declarator')
+            for declaration in fn_declarators:
+            # elif child.type == 'function_declarator':
+                # for subchild in child.children:
+                for subchild in declaration.children:
                     if subchild.type in ['qualified_identifier', 'identifier']:
                         metadata['identifier'] = match_from_span(subchild, blob)
                     elif subchild.type == 'parameter_list':

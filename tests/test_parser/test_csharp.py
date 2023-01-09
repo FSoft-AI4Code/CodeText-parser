@@ -3,35 +3,29 @@ import os
 import unittest
 from pathlib import Path
 
-from tree_sitter import Language, Parser
-from codetext.parser import CsharpParser
-from codetext.utils import parse_code
+from src.codetext.parser import CsharpParser
+from src.codetext.utils import parse_code
 
-ROOT_PATH = str(Path(__file__).parents[1])
 
 class Test_CsharpParser(unittest.TestCase):
     def setUp(self) -> None:
-        parser = Parser()
-        language = Language(ROOT_PATH + "/tree-sitter/c_sharp.so", 'c_sharp')
-        parser.set_language(language)
-        
         with open('tests/test_parser/test_sample/c_sharp_test_sample.cs', 'r') as file:
             self.code_sample = file.read()
         
-        self.parser = parser
+        tree = parse_code(self.code_sample, 'c#')
+        self.root_node = tree.root_node
+        
         return super().setUp()
 
     def test_get_function_list(self):
-        tree = self.parser.parse(bytes(self.code_sample, 'utf8'))
-        root = tree.root_node
+        root = self.root_node
         
         function_list = CsharpParser.get_function_list(root)
         
         self.assertEqual(len(function_list), 3)  # exclude constructor
 
     def test_get_class_list(self):
-        tree = self.parser.parse(bytes(self.code_sample, 'utf8'))
-        root = tree.root_node
+        root = self.root_node
         
         class_list = CsharpParser.get_class_list(root)
         
@@ -63,7 +57,7 @@ class Test_CsharpParser(unittest.TestCase):
             }
         }   
         """
-        tree = parse_code(code_sample, 'c_sharp', './')
+        tree = parse_code(code_sample, 'c#')
         root = tree.root_node
         
         fn1, fn2 = list(CsharpParser.get_function_list(root))
@@ -76,8 +70,7 @@ class Test_CsharpParser(unittest.TestCase):
         
 
     def test_get_function_metadata(self):
-        tree = self.parser.parse(bytes(self.code_sample, 'utf8'))
-        root = tree.root_node
+        root = self.root_node
         
         function = list(CsharpParser.get_function_list(root))[0]
         metadata = CsharpParser.get_function_metadata(function, self.code_sample)
@@ -87,8 +80,7 @@ class Test_CsharpParser(unittest.TestCase):
         self.assertEqual(metadata['type'], 'string')
 
     def test_get_class_metadata(self):
-        tree = self.parser.parse(bytes(self.code_sample, 'utf8'))
-        root = tree.root_node
+        root = self.root_node
         
         classes = list(CsharpParser.get_class_list(root))[0]
         metadata = CsharpParser.get_class_metadata(classes, self.code_sample)
@@ -96,9 +88,6 @@ class Test_CsharpParser(unittest.TestCase):
         self.assertEqual(metadata['parameters'], ['Animal'])
         self.assertEqual(metadata['identifier'], 'Dog')
 
-    def test_extract_docstring(self):
-        pass
-        
 
 if __name__ == '__main__':
     unittest.main()

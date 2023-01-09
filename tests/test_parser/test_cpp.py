@@ -3,42 +3,36 @@ import os
 import unittest
 from pathlib import Path
 
-from tree_sitter import Language, Parser
-from codetext.parser import CppParser
+from src.codetext.parser import CppParser
+from src.codetext.utils import parse_code
 
-ROOT_PATH = str(Path(__file__).parents[1])
 
 class Test_CppParser(unittest.TestCase):
     def setUp(self) -> None:
-        parser = Parser()
-        language = Language(ROOT_PATH + "/tree-sitter/cpp.so", 'cpp')
-        parser.set_language(language)
-        
         with open('tests/test_parser/test_sample/cpp_test_sample.cpp', 'r') as file:
             self.code_sample = file.read()
-        
-        self.parser = parser
+            
+        tree = parse_code(self.code_sample, 'c++')
+        self.root_node = tree.root_node
+
         return super().setUp()
 
     def test_get_function_list(self):
-        tree = self.parser.parse(bytes(self.code_sample, 'utf8'))
-        root = tree.root_node
+        root = self.root_node
         
         function_list = CppParser.get_function_list(root)
         
         self.assertEqual(len(function_list), 3)
         
     def test_get_class_list(self):
-        tree = self.parser.parse(bytes(self.code_sample, 'utf8'))
-        root = tree.root_node
+        root = self.root_node
         
         class_list = CppParser.get_class_list(root)
         
         self.assertEqual(len(class_list), 2)
 
     def test_get_function_metadata(self):
-        tree = self.parser.parse(bytes(self.code_sample, 'utf8'))
-        root = tree.root_node
+        root = self.root_node
         
         function = list(CppParser.get_function_list(root))[0]
         metadata = CppParser.get_function_metadata(function, self.code_sample)
@@ -48,8 +42,7 @@ class Test_CppParser(unittest.TestCase):
         self.assertEqual(metadata['type'], 'int')
     
     def test_get_class_metadata(self):
-        tree = self.parser.parse(bytes(self.code_sample, 'utf8'))
-        root = tree.root_node
+        root = self.root_node
         
         classes = list(CppParser.get_class_list(root))[0]
         metadata = CppParser.get_class_metadata(classes, self.code_sample)
@@ -93,7 +86,7 @@ class Test_CppParser(unittest.TestCase):
             return a + b;
         }
         """
-        tree = self.parser.parse(bytes(code_sample, 'utf8'))
+        tree = parse_code(code_sample, 'c++')
         root = tree.root_node
         
         fn1, fn2 = list(CppParser.get_function_list(root))

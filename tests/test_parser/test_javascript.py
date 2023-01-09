@@ -3,9 +3,8 @@ import os
 import unittest
 from pathlib import Path
 
-from tree_sitter import Language, Parser
-from codetext.parser import JavascriptParser
-from codetext.utils import parse_code
+from src.codetext.parser import JavascriptParser
+from src.codetext.utils import parse_code
 
 
 class Test_JavascriptParser(unittest.TestCase):
@@ -62,7 +61,7 @@ class Test_JavascriptParser(unittest.TestCase):
         }
         """
 
-        tree = parse_code(code_sample, 'javascript', './')
+        tree = parse_code(code_sample, 'javascript')
         root = tree.root_node
         
         fn1, fn2 = JavascriptParser.get_function_list(root)

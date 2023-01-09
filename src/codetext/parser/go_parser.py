@@ -98,7 +98,7 @@ class GoParser(LanguageParser):
         }
         
         for child in function_node.children:
-            if child.type == 'field_identifier':
+            if child.type in ['field_identifier', 'identifier']:
                 metadata['identifier'] = match_from_span(child, blob)
             elif child.type == 'type_identifier':
                 metadata['type'] = match_from_span(child, blob)

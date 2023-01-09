@@ -3,9 +3,8 @@ import os
 import unittest
 from pathlib import Path
 
-from tree_sitter import Language, Parser
-from codetext.parser import RustParser
-from codetext.utils import parse_code
+from src.codetext.parser import RustParser
+from src.codetext.utils import parse_code
 
 
 class Test_RustParser(unittest.TestCase):
@@ -13,7 +12,7 @@ class Test_RustParser(unittest.TestCase):
         with open('tests/test_parser/test_sample/rust_test_sample.rs', 'r') as file:
             self.code_sample = file.read()
             
-        tree = parse_code(self.code_sample, 'rust', './')
+        tree = parse_code(self.code_sample, 'rust')
         self.root_node = tree.root_node
 
         return super().setUp()

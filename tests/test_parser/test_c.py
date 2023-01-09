@@ -2,15 +2,16 @@
 import os
 import unittest
 
-from codetext.parser import CppParser
-from codetext.utils import parse_code
+from src.codetext.parser import CppParser
+from src.codetext.utils import parse_code
+
 
 class Test_CppParser_with_C(unittest.TestCase):
     def setUp(self) -> None:
         with open('tests/test_parser/test_sample/c_test_sample.c', 'r') as file:
             self.code_sample = file.read()
             
-        tree = parse_code(self.code_sample, 'c', './')
+        tree = parse_code(self.code_sample, 'c')
         self.root_node = tree.root_node
 
         return super().setUp()

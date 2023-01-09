@@ -3,9 +3,9 @@ import os
 import unittest
 from pathlib import Path
 
-from tree_sitter import Language, Parser
-from codetext.parser import GoParser
-from codetext.utils import parse_code
+from src.codetext.parser import GoParser
+from src.codetext.utils import parse_code
+
 
 class Test_GoParser(unittest.TestCase):
     def setUp(self) -> None:
@@ -54,7 +54,7 @@ class Test_GoParser(unittest.TestCase):
             return msg
         }
         """
-        tree = parse_code(code_sample, 'go', './')
+        tree = parse_code(code_sample, 'go')
         root = tree.root_node
         
         fn = GoParser.get_function_list(root)[0]

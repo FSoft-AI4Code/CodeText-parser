@@ -1,13 +1,13 @@
 import unittest
-from ...src.codetext.utils import build_language, parse_code
+from src.codetext.utils import build_language, parse_code
+
 
 class Test_Utils(unittest.TestCase):
     def test_build_language(self):
         langs = ['python', 'rust']
         for l in langs:
             # clear it later
-            build_language(language=l, save_path="./tmp/")
-        
+            build_language(language=l)
     
     def test_parse_code(self):
         sample = """

@@ -1,4 +1,6 @@
 import json
+import inspect
+import sys
 import os
 import subprocess
 import logging
@@ -9,8 +11,6 @@ import tree_sitter
 from tree_sitter import Language, Parser
 
 
-ROOT_PATH = str(Path(__file__).parents[3])
-
 logger = logging.getLogger('utils')
 logging.basicConfig(level = logging.INFO)
 
@@ -18,7 +18,7 @@ logging.basicConfig(level = logging.INFO)
 SUPPORTED_LANGUAGE = ['python', 'java', 'javascript', 'ruby', 'go', 'c', 'cpp', 'c_sharp', 'php', 'rust']
 
 
-def build_language(language: str, save_path: str=ROOT_PATH):
+def build_language(language: str, save_path: str=None):
     """
     Build tree-sitter language
     
@@ -26,17 +26,23 @@ def build_language(language: str, save_path: str=ROOT_PATH):
         language (str): java, python, cpp, c_sharp, etc
         save_path (str): save path (default create a `/tree-sitter/` dir)
     """
+    if not save_path:
+        calling_script_path = Path(inspect.getframeinfo(sys._getframe(1)).filename)
+        save_path = calling_script_path.parent
+        
+    # create `tree-sitter` dir
     ts_path = os.path.join(save_path, 'tree-sitter')
     if not os.path.exists(ts_path):
-        logger.info(
-            f"Not found tree-sitter folder, create new one in {ts_path}"
+        logger.warn(
+            f"Not found `tree-sitter` folder, create new one in {ts_path}"
         )
         os.mkdir(ts_path)
     
+    # check `tree-sitter/tree-sitter-<language>`
     ts_lang_path = os.path.join(ts_path, 'tree-sitter-'+language)
     if not os.path.exists(ts_lang_path):
-        logger.info(
-            f"Not found tree-sitter-{language}, attempt clone from github to {ts_path}"
+        logger.warn(
+            f"Not found `tree-sitter-{language}`, attempt clone from github to {ts_path}"
         )
         command = f"cd {ts_path}; git clone https://github.com/tree-sitter/tree-sitter-{language}.git"
         subprocess.Popen(command ,shell=True).wait()
@@ -51,6 +57,8 @@ def build_language(language: str, save_path: str=ROOT_PATH):
         )
         Language.build_library(lang_path, [ts_lang_path])
         assert os.path.exists(lang_path)==True
+    else:
+        logger.info(f"Language already existed!")
         
     
 def parse_code(raw_code: str, language: str='Auto', tree_sitter_path: str=None) -> tree_sitter.Tree:
@@ -74,10 +82,13 @@ def parse_code(raw_code: str, language: str='Auto', tree_sitter_path: str=None) 
     if tree_sitter_path:
         load_path = tree_sitter_path
     else:
-        load_path = ROOT_PATH
+        calling_script_path = Path(inspect.getframeinfo(sys._getframe(1)).filename)
+        load_path = str(calling_script_path.parent)
+
     ts_lang_path = os.path.join(load_path, 'tree-sitter', f'{language}.so')
     if not os.path.exists(ts_lang_path):
-        build_language(language)
+        logger.warn(f"Not found `{language}.so` in `{load_path}/tree-sitter/`, attemp to build language")
+        build_language(language, load_path)
         
     parser = Parser()
     language = Language(load_path + f"/tree-sitter/{language}.so", language)

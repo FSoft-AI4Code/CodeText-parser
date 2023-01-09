@@ -3,9 +3,8 @@ import os
 import unittest
 from pathlib import Path
 
-from tree_sitter import Language, Parser
-from codetext.parser import PhpParser
-from codetext.utils import parse_code
+from src.codetext.parser import PhpParser
+from src.codetext.utils import parse_code
 
 
 class Test_PhpParser(unittest.TestCase):
@@ -51,7 +50,7 @@ class Test_PhpParser(unittest.TestCase):
         ?>
         """
 
-        tree = parse_code(code_sample, 'php', './')
+        tree = parse_code(code_sample, 'php')
         root = tree.root_node
         
         fn = PhpParser.get_function_list(root)[0]
@@ -79,9 +78,6 @@ class Test_PhpParser(unittest.TestCase):
 
         self.assertEqual(metadata['parameters'], ['AbstractSQLServerDriver'])
         self.assertEqual(metadata['identifier'], 'Driver')
-
-    def test_extract_docstring(self):
-        pass
         
 
 if __name__ == '__main__':

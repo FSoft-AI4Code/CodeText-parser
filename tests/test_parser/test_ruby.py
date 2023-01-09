@@ -3,9 +3,8 @@ import os
 import unittest
 from pathlib import Path
 
-from tree_sitter import Language, Parser
-from codetext.parser import RubyParser
-from codetext.utils import parse_code
+from src.codetext.parser import RubyParser
+from src.codetext.utils import parse_code
 
 
 class Test_RubyParser(unittest.TestCase):
@@ -13,7 +12,7 @@ class Test_RubyParser(unittest.TestCase):
         with open('tests/test_parser/test_sample/ruby_test_sample.rb', 'r') as file:
             self.code_sample = file.read()
             
-        tree = parse_code(self.code_sample, 'ruby', './')
+        tree = parse_code(self.code_sample, 'ruby')
         self.root_node = tree.root_node
 
         return super().setUp()

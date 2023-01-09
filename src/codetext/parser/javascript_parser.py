@@ -69,7 +69,7 @@ class JavascriptParser(LanguageParser):
         }
         param = []
         for child in function_node.children:
-            if child.type == 'identifier':
+            if child.type in ['identifier', 'property_identifier']:
                 metadata['identifier'] = match_from_span(child, blob)
             elif child.type == 'formal_parameters':
                 for subchild in child.children:
