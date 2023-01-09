@@ -23,7 +23,7 @@ def build_language(language: str, save_path: str=None):
     Build tree-sitter language
     
     Args:
-        language (str): java, python, cpp, c_sharp, etc
+        language (str): java, python, cpp, c-sharp, etc
         save_path (str): save path (default create a `/tree-sitter/` dir)
     """
     if not save_path:
@@ -33,7 +33,7 @@ def build_language(language: str, save_path: str=None):
     # create `tree-sitter` dir
     ts_path = os.path.join(save_path, 'tree-sitter')
     if not os.path.exists(ts_path):
-        logger.warn(
+        logger.warning(
             f"Not found `tree-sitter` folder, create new one in {ts_path}"
         )
         os.mkdir(ts_path)
@@ -41,15 +41,15 @@ def build_language(language: str, save_path: str=None):
     # check `tree-sitter/tree-sitter-<language>`
     ts_lang_path = os.path.join(ts_path, 'tree-sitter-'+language)
     if not os.path.exists(ts_lang_path):
-        logger.warn(
-            f"Not found `tree-sitter-{language.replace('_', '-')}`, attempt clone from github to {ts_path}"
+        logger.warning(
+            f"Not found `tree-sitter-{language}`, attempt clone from github to {ts_path}"
         )
-        command = f"cd {ts_path}; git clone https://github.com/tree-sitter/tree-sitter-{language.replace('_', '-')}.git"
+        command = f"cd {ts_path}; git clone https://github.com/tree-sitter/tree-sitter-{language}.git"
         subprocess.Popen(command ,shell=True).wait()
         
         assert os.path.exists(ts_lang_path)==True, f"Unable to find {language} tree-sitter in {ts_path}"
     
-    if language == 'c-sharp': language = 'c_sharp'
+    # if language == 'c-sharp': language = 'c_sharp'
     lang_path = os.path.join(save_path, 'tree-sitter', f'{language}.so')
     if not os.path.exists(lang_path):
         logger.info(
@@ -75,7 +75,7 @@ def parse_code(raw_code: str, language: str='Auto', tree_sitter_path: str=None) 
     
     language = str(language).lower()
     if language == 'c#':
-        language = 'c_sharp'
+        language = 'c-sharp'
     elif language == 'c++':
         language = 'cpp'
     
@@ -87,7 +87,7 @@ def parse_code(raw_code: str, language: str='Auto', tree_sitter_path: str=None) 
 
     ts_lang_path = os.path.join(load_path, 'tree-sitter', f'{language}.so')
     if not os.path.exists(ts_lang_path):
-        logger.warn(f"Not found `{language}.so` in `{load_path}/tree-sitter/`, attemp to build language")
+        logger.warning(f"Not found `{language}.so` in `{load_path}/tree-sitter/`, attemp to build language")
         build_language(language, load_path)
         
     parser = Parser()
