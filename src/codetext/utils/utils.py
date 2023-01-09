@@ -42,9 +42,9 @@ def build_language(language: str, save_path: str=None):
     ts_lang_path = os.path.join(ts_path, 'tree-sitter-'+language)
     if not os.path.exists(ts_lang_path):
         logger.warn(
-            f"Not found `tree-sitter-{language}`, attempt clone from github to {ts_path}"
+            f"Not found `tree-sitter-{language.replace('_', '-')}`, attempt clone from github to {ts_path}"
         )
-        command = f"cd {ts_path}; git clone https://github.com/tree-sitter/tree-sitter-{language}.git"
+        command = f"cd {ts_path}; git clone https://github.com/tree-sitter/tree-sitter-{language.replace('_', '-')}.git"
         subprocess.Popen(command ,shell=True).wait()
         
         assert os.path.exists(ts_lang_path)==True, f"Unable to find {language} tree-sitter in {ts_path}"
