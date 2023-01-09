@@ -1,0 +1,6 @@
+# for preprocessing
+tree-sitter
+# docstring-parser
+Levenshtein
+langdetect
+bs4
