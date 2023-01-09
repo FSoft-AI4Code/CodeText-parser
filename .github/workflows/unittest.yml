@@ -27,5 +27,4 @@ jobs:
 
     - name: Run tests
       run: |
-        python -m tests.test_parser.setup
         python -m unittest
