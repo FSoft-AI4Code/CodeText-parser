@@ -1,7 +1,11 @@
 import re
 from typing import List, Dict, Iterable, Optional, Iterator, Any
+import logging
 
-from .language_parser import match_from_span, tokenize_code, tokenize_docstring, LanguageParser, traverse_type
+from .language_parser import LanguageParser, get_node_by_kind, get_node_text
+
+
+logger = logging.getLogger(__name__)
 
 
 class PythonParser(LanguageParser):
@@ -10,24 +14,23 @@ class PythonParser(LanguageParser):
     
     @staticmethod
     def get_docstring(node, blob):
+        logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = PythonParser.get_docstring_node(node)
         
         docstring = ''
         if docstring_node is not None:
-            docstring = match_from_span(docstring_node[0], blob)
+            docstring = get_node_text(docstring_node[0])
             docstring = docstring.strip('"').strip("'").strip("#")
         return docstring
     
     @staticmethod
     def get_function_list(node):
-        res = []
-        traverse_type(node, res, ['function_definition'])
+        res = get_node_by_kind(node, ['function_definition'])
         return res
 
     @staticmethod
     def get_class_list(node):
-        res = []
-        traverse_type(node, res, ['class_definition'])
+        res = get_node_by_kind(node, ['class_definition'])
         return res
     
     @staticmethod
@@ -50,76 +53,68 @@ class PythonParser(LanguageParser):
     
     @staticmethod
     def get_comment_node(node):
-        comment_node = []
-        traverse_type(node, comment_node, kind=['comment', 'expression_statement'])
+        comment_node = get_node_by_kind(node, kind=['comment', 'expression_statement'])
         for node in comment_node[:]:
             if node.type == 'expression_statement' and node.children[0].type != 'string':
                 comment_node.remove(node)
         return comment_node
     
     @staticmethod
-    def get_function_metadata(function_node, blob: str) -> Dict[str, str]:
+    def get_function_metadata(function_node, blob: str=None) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
-            'return': ''
+            'parameters': {},
+            'return_type': None,
         }
 
-        is_header = False
         for child in function_node.children:
-            if is_header:
-                if child.type == 'identifier':
-                    metadata['identifier'] = match_from_span(child, blob)
-                elif child.type == 'parameters':
-                    params = []
-                    parameter_list = match_from_span(child, blob).split(',')  # self, param: str = None -> ['self', 'param: str = None']
-                    for param in parameter_list:
-                        item = re.sub(r'[^a-zA-Z0-9\_]', ' ', param).split()
-                        if len(item) > 0:
-                            params.append(item[0].strip())
-                    metadata['parameters'] = params
-            if child.type == 'def':
-                is_header = True
-            elif child.type == ':':
-                is_header = False
-            elif child.type == 'return_statement':
-                metadata['return'] = match_from_span(child, blob)
+            if child.type == 'identifier':
+                metadata['identifier'] = get_node_text(child)
+            elif child.type == 'parameters':
+                for subchild in child.children:
+                    if subchild.type == 'identifier':
+                        metadata['parameters'][get_node_text(subchild)] = None
+                    elif subchild.type in ['typed_parameter', 'default_parameter', 'typed_default_parameter']:
+                        param_type = get_node_by_kind(subchild, ['type'])
+                        if param_type:
+                            param_type = get_node_text(param_type[0])
+                        else:
+                            param_type = None
+                        param_identifier = get_node_by_kind(subchild, ['identifier'])
+                        assert len(param_identifier) != 0, "Empty identifier"
+                        param_identifier = get_node_text(param_identifier[0])
+                        metadata['parameters'][param_identifier] = param_type
+            elif child.type == 'type':
+                metadata['return_type'] = get_node_text(child)
+                
+        if not metadata['return_type']:
+            return_statement = get_node_by_kind(function_node, ['return_statement'])
+            if len(return_statement) > 0:
+                metadata['return_type'] = '<not_specific>'
+            else:
+                metadata['return_type'] = None
+                
         return metadata
 
     @staticmethod
     def get_class_metadata(class_node, blob: str) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': [],
         }
-        is_header = False
         for child in class_node.children:
-            if is_header:
-                if child.type == 'identifier':
-                    metadata['identifier'] = match_from_span(child, blob)
-                elif child.type == 'argument_list':
-                    args = []
-                    argument_list = match_from_span(child, blob).split(',')
-                    for arg in argument_list:
-                        item = re.sub(r'[^a-zA-Z0-9\_]', ' ', arg).split()
-                        if len(item) > 0:
-                            args.append(item[0].strip())
-                    metadata['parameters'] = args
-            if child.type == 'class':
-                is_header = True
-            elif child.type == ':':
-                break
+            if child.type == 'identifier':
+                metadata['identifier'] = get_node_text(child)
+            elif child.type == 'argument_list':
+                args = []
+                argument_list = get_node_text(child).split(',')
+                for arg in argument_list:
+                    item = re.sub(r'[^a-zA-Z0-9\_]', ' ', arg).split()
+                    if len(item) > 0:
+                        args.append(item[0].strip())
+                metadata['parameters'] = args
 
         # get __init__ function
         return metadata
-
-    @staticmethod
-    def is_function_empty(function_node) -> bool:
-        for child in function_node.children:
-            if child.type == 'block':
-                for item in child.children:
-                    if item.type == 'comment' or (item.type == 'expression_statement' and item.children[0].type == 'string'):
-                        continue
-                    elif item.type != 'pass_statement' and item.type != 'raise_statement':
-                        return False
-        return True

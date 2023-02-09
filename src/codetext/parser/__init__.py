@@ -14,5 +14,7 @@ from .language_parser import LanguageParser
 
 __all__ = [
     'GoParser', 'PhpParser', 'RubyParser', 'JavaParser', 'JavascriptParser',
-    'PythonParser', 'CppParser', 'CsharpParser', 'RustParser', 'LanguageParser'
+    'PythonParser', 'CppParser', 'CsharpParser', 'RustParser', 'LanguageParser',
+    'get_node_by_kind', 'get_node_text', 'tokenize_code', 'tokenize_docstring',
+    'nodes_are_equal'
 ]

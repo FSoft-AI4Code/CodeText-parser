@@ -37,9 +37,11 @@ class Test_CppParser(unittest.TestCase):
         function = list(CppParser.get_function_list(root))[0]
         metadata = CppParser.get_function_metadata(function, self.code_sample)
 
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys(), "Missing {}".format(key))
         self.assertEqual(metadata['parameters'], {'a': 'int', 'b': 'int'})
         self.assertEqual(metadata['identifier'], 'sum2number')
-        self.assertEqual(metadata['type'], 'int')
+        self.assertEqual(metadata['return_type'], 'int')
     
     def test_get_class_metadata(self):
         root = self.root_node
@@ -96,10 +98,6 @@ class Test_CppParser(unittest.TestCase):
         
         self.assertEqual(docs1, '/**\n        * Find 2 sum\n        *\n        * @param nums List number.\n        * @param target Sum target.\n        * @return postion of 2 number.\n        */')
         self.assertEqual(docs2, '// Comment in\n// multiple line\n// of the function sum')
-        
-
-    def test_extract_docstring(self):
-        pass
 
 
 if __name__ == '__main__':

@@ -1,7 +1,10 @@
 from typing import List, Dict, Any
 import tree_sitter
+import logging
 
-from .language_parser import LanguageParser, match_from_span, traverse_type
+from .language_parser import LanguageParser, get_node_by_kind, get_node_text
+
+logger = logging.getLogger(name=__name__)
 
 
 class CsharpParser(LanguageParser):
@@ -19,8 +22,9 @@ class CsharpParser(LanguageParser):
         Returns:
             str: docstring
         """
+        logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = CsharpParser.get_docstring_node(node)
-        docstring = '\n'.join(match_from_span(s, blob) for s in docstring_node)
+        docstring = '\n'.join(get_node_text(s) for s in docstring_node)
         return docstring
     
     @staticmethod
@@ -85,21 +89,18 @@ class CsharpParser(LanguageParser):
         Return:
             List: list of comment nodes
         """
-        comment_node = []
-        traverse_type(node, comment_node, kind=['comment'])
+        comment_node = get_node_by_kind(node, kind=['comment'])
         return comment_node
     
     @staticmethod
     def get_function_list(node):
-        res = []
+        res = get_node_by_kind(node, ['local_function_statement', 'method_declaration'])
         # We don't use "constructor_declaration"
-        traverse_type(node, res, ['local_function_statement', 'method_declaration'])
         return res
 
     @staticmethod
     def get_class_list(node):
-        res = []
-        traverse_type(node, res, ['class_declaration'])
+        res = get_node_by_kind(node, ['class_declaration'])
         return res
 
     @staticmethod
@@ -110,25 +111,25 @@ class CsharpParser(LanguageParser):
             - parameters (Dict[str, str]): parameter's name and their type (e.g: {'param_a': 'int'})
             - type (str): type
         """
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
-            'type': ''
+            'return_type': None
         }
         assert type(function_node) == tree_sitter.Node
         
         for child in function_node.children:
             if child.type == 'predefined_type':
-                metadata['type'] = match_from_span(child, blob)
+                metadata['type'] = get_node_text(child)
             elif child.type == 'identifier':
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'parameter_list':
                 for param_node in child.children:
-                    param_nodes = []
-                    traverse_type(param_node, param_nodes, ['parameter'])
+                    param_nodes = get_node_by_kind(param_node, ['parameter'])
                     for param in param_nodes:
-                        param_type = match_from_span(param.children[0], blob)
-                        param_identifier = match_from_span(param.children[1], blob)
+                        param_type = get_node_text(param.children[0])
+                        param_identifier = get_node_text(param.children[1])
                     
                         metadata['parameters'][param_identifier] = param_type
         return metadata
@@ -140,6 +141,7 @@ class CsharpParser(LanguageParser):
             - identifier (str): class's name
             - parameters (List[str]): inheritance class
         """
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',
@@ -148,12 +150,12 @@ class CsharpParser(LanguageParser):
         
         for child in class_node.children:
             if child.type == 'identifier':
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'base_list':
                 argument_list = []
                 for arg in child.children:
                     if arg.type == 'identifier':
-                        argument_list.append(match_from_span(arg, blob))
+                        argument_list.append(get_node_text(arg))
                 metadata['parameters'] = argument_list
 
         return metadata

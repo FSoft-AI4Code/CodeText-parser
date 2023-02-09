@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import Levenshtein as lev
 
 from tree_sitter import Node
-from ..parser.language_parser import tokenize_docstring, traverse_type
+from ..parser.language_parser import tokenize_docstring, get_node_by_kind
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
 
 
@@ -62,8 +62,7 @@ def check_is_node_error(node: Node) -> bool:
     if not isinstance(node, Node):
         raise ValueError("Expect type tree_sitter.Node, get %i", type(node))
 
-    error_node = []        
-    traverse_type(node, error_node, ['ERROR'])
+    error_node = get_node_by_kind(node, ['ERROR'])
     if len(error_node) > 0:
         return True
     else:
@@ -99,10 +98,11 @@ def remove_comment_delimiters(docstring: str, remove_whitespace: bool=True) -> s
         str: removed delimiters docstring/comment
     
     """
-    
+    clean_pattern = re.compile(r'([\'\"]{3})$|^([\'\"]{3})') # remove python ''' or """
     clean_pattern1 = re.compile(r'([#]+)$|^([#]+)')  # special single-line comment with #
     clean_pattern2 = re.compile(r'([\/*=-]+)$|^([\/*!=-]+)')
     
+    docstring = re.sub(clean_pattern, '', docstring)
     new_docstring = []
     for line in docstring.split('\n'):
         if remove_whitespace:
@@ -145,6 +145,9 @@ def remove_link_in_brackets(docstring):
         - (https://www.a.ai)
         - <see https://www.b.ai>
         - <eg. a b c>
+        
+    \param
+    \brief
 
     This function is applied to each line of the docstring/paragraph.
     """

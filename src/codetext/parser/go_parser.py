@@ -1,7 +1,10 @@
 from typing import List, Dict, Any
+import logging
 
-from .language_parser import LanguageParser, match_from_span, tokenize_code, tokenize_docstring, traverse_type
-# from function_parser.parsers.commentutils import get_docstring_summary, strip_c_style_comment_delimiters
+from .language_parser import LanguageParser, get_node_by_kind, get_node_text
+
+
+logger = logging.getLogger(__name__)
 
 
 class GoParser(LanguageParser):
@@ -17,8 +20,7 @@ class GoParser(LanguageParser):
         Return:
             List: list of comment nodes
         """
-        comment_node = []
-        traverse_type(function_node, comment_node, kind='comment')
+        comment_node = get_node_by_kind(function_node, comment_node, kind='comment')
         return comment_node
     
     @staticmethod
@@ -69,7 +71,7 @@ class GoParser(LanguageParser):
         return docstring_node
     
     @staticmethod
-    def get_docstring(node, blob):
+    def get_docstring(node, blob:str):
         """
         Get docstring description for node
         
@@ -79,39 +81,40 @@ class GoParser(LanguageParser):
         Returns:
             str: docstring
         """
+        logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = GoParser.get_docstring_node(node)
-        docstring = '\n'.join(match_from_span(s, blob) for s in docstring_node)
+        docstring = '\n'.join(get_node_text(s) for s in docstring_node)
         return docstring
     
     @staticmethod
     def get_function_list(node):
-        res = []
-        traverse_type(node, res, ['method_declaration', 'function_declaration'])
+        res = get_node_by_kind(node, ['method_declaration', 'function_declaration'])
         return res
     
     @staticmethod
     def get_function_metadata(function_node, blob: str) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
-            'type': '',
+            'return_type': None,
         }
         
         for child in function_node.children:
             if child.type in ['field_identifier', 'identifier']:
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'type_identifier':
-                metadata['type'] = match_from_span(child, blob)
+                metadata['type'] = get_node_text(child)
             elif child.type == 'parameter_list':
                 for subchild in child.children:
                     if subchild.type in ['parameter_declaration', 'variadic_parameter_declaration']:
                         identifier_node = subchild.child_by_field_name('name')
-                        param_type = match_from_span(subchild.child_by_field_name('type'), blob)
+                        param_type = get_node_text(subchild.child_by_field_name('type'))
                         
                         if not identifier_node:
                             continue
                         
-                        identifier = match_from_span(identifier_node, blob)
+                        identifier = get_node_text(identifier_node)
                         if identifier and param_type:
                             metadata['parameters'][identifier] = param_type
         
@@ -123,4 +126,5 @@ class GoParser(LanguageParser):
     
     @staticmethod
     def get_class_metadata(class_node, blob) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         pass

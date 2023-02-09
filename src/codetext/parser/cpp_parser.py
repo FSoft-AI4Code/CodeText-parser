@@ -1,8 +1,12 @@
 from typing import List, Dict, Any
 
 import tree_sitter
+import logging
 
-from .language_parser import LanguageParser, match_from_span, tokenize_code, tokenize_docstring, traverse_type
+from .language_parser import LanguageParser, get_node_text, get_node_by_kind
+
+logger = logging.getLogger(name=__name__)
+
 
 class CppParser(LanguageParser):
     
@@ -19,8 +23,9 @@ class CppParser(LanguageParser):
         Returns:
             str: docstring
         """
+        logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = CppParser.get_docstring_node(node)
-        docstring = '\n'.join(match_from_span(s, blob) for s in docstring_node)
+        docstring = '\n'.join(get_node_text(s) for s in docstring_node)
         return docstring
     
     @staticmethod
@@ -73,14 +78,12 @@ class CppParser(LanguageParser):
     
     @staticmethod
     def get_function_list(node):
-        res = []
-        traverse_type(node, res, ['function_definition'])
+        res = get_node_by_kind(node, ['function_definition'])
         return res
 
     @staticmethod
     def get_class_list(node):
-        res = []
-        traverse_type(node, res, ['class_specifier'])
+        res = get_node_by_kind(node, ['class_specifier'])
         return res
         
     @staticmethod
@@ -92,8 +95,7 @@ class CppParser(LanguageParser):
         Return:
             List: list of comment nodes
         """
-        comment_node = []
-        traverse_type(node, comment_node, kind=['comment'])
+        comment_node = get_node_by_kind(node, kind=['comment'])
         return comment_node
     
     @staticmethod
@@ -102,36 +104,32 @@ class CppParser(LanguageParser):
         Function metadata contains:
             - identifier (str): function name
             - parameters (Dict[str, str]): parameter's name and their type (e.g: {'param_a': 'int'})
-            - type (str): return type
+            - return_type (str or NoneType): function's return type
         """
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
-            'type': ''
+            'return_type': None,
         }
         assert type(function_node) == tree_sitter.Node
         
         for child in function_node.children:
-            if child.type == 'primitive_type':
-                metadata['type'] = match_from_span(child, blob)
+            if child.type in ['primitive_type', 'type_identifier']:
+                metadata['return_type'] = get_node_text(child)
                 # search for "function_declarator"
-            fn_declarators = []
-            traverse_type(child, fn_declarators, 'function_declarator')
-            for declaration in fn_declarators:
-            # elif child.type == 'function_declarator':
-                # for subchild in child.children:
-                for subchild in declaration.children:
+            elif child.type == 'function_declarator':
+                for subchild in child.children:
                     if subchild.type in ['qualified_identifier', 'identifier']:
-                        metadata['identifier'] = match_from_span(subchild, blob)
+                        metadata['identifier'] = get_node_text(subchild)
                     elif subchild.type == 'parameter_list':
-                        param_nodes = []
-                        traverse_type(subchild, param_nodes, ['parameter_declaration'])
+                        param_nodes = get_node_by_kind(subchild, ['parameter_declaration'])
                         for param in param_nodes:
-                            if len(param.children) < 2:
-                                continue
-                            param_type = match_from_span(param.children[0], blob)
-                            param_identifier = match_from_span(param.children[1], blob)
-                            
+                            for item in param.children:
+                                if item.type in ['type_identifier', 'primitive_type']:
+                                    param_type = get_node_text(item)
+                                elif item.type == 'identifier':
+                                    param_identifier = get_node_text(item)
                             metadata['parameters'][param_identifier] = param_type
 
         return metadata
@@ -151,12 +149,12 @@ class CppParser(LanguageParser):
         
         for child in class_node.children:
             if child.type == 'type_identifier':
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'base_class_clause':
                 argument_list = []
                 for param in child.children:
                     if param.type == 'type_identifier':
-                        argument_list.append(match_from_span(param, blob))
+                        argument_list.append(get_node_text(param))
                 metadata['parameters'] = argument_list
 
         return metadata

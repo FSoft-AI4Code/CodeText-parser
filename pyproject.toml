@@ -21,7 +21,6 @@ dependencies = [
     "Levenshtein>=0.20",
     "langdetect>=1.0.0",
     "bs4>=0.0.1",
-    "cloc>=0.2.5",
 ]
 
 [project.urls]

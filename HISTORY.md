@@ -65,3 +65,15 @@ Release data: Dec 12, 2022
 * Fix package import path
 * Adding auto build workflow
 * Seperate codetext parser with processing source code
+* Fix `remove_comment_delimiter` remove leading whitespace
+* Update unittest for parser and utilites
+
+Version 0.0.6
+=============
+Release data: Jan 9, 2022
+
+* Add tree sitter utils (in codetext.parser)
+* Replace all `match_from_span` to `get_node_text`
+* Replace all `traverse_type` to `get_node_by_kind`
+* Fix `CppParser.get_function_metadata` missing `param_type` and `param_identifier`
+* Update return metadata from all parser

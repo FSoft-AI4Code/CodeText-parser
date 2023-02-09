@@ -63,6 +63,8 @@ class Test_JavaParser(unittest.TestCase):
         function = list(JavaParser.get_function_list(root))[0]
         metadata = JavaParser.get_function_metadata(function, self.code_sample)
 
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['parameters'], {'context': 'Context', 'userIndex': 'int'})
         self.assertEqual(metadata['identifier'], 'getHabitList')
         self.assertEqual(metadata['type'], 'HabitList')

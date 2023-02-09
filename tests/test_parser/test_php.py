@@ -66,7 +66,9 @@ class Test_PhpParser(unittest.TestCase):
         function = list(PhpParser.get_function_list(root))[1]
         metadata = PhpParser.get_function_metadata(function, self.code_sample)
 
-        self.assertEqual(metadata['parameters'], ['params', 'connectionOptions'])
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
+        self.assertEqual(metadata['parameters'], ['$params', '$connectionOptions'])
         self.assertEqual(metadata['identifier'], 'constructDsn')
         self.assertEqual(metadata['type'], 'string')
 

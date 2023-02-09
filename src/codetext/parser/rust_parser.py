@@ -2,8 +2,12 @@ import re
 from typing import List, Dict, Any
 
 import tree_sitter
+import logging
 
-from .language_parser import LanguageParser, match_from_span, tokenize_code, tokenize_docstring, traverse_type
+from .language_parser import LanguageParser, get_node_by_kind, get_node_text
+
+
+logger = logging.getLogger(__name__)
 
 
 class RustParser(LanguageParser):
@@ -14,14 +18,12 @@ class RustParser(LanguageParser):
 
     @staticmethod
     def get_function_list(node):
-        res = []
-        traverse_type(node, res, ['function_item'])
+        res = get_node_by_kind(node, ['function_item'])
         return res
     
     @staticmethod
     def get_class_list(node):
-        res = []
-        traverse_type(node, res, ['impl_item', 'mod_item'])  # trait is like an interface
+        res = get_node_by_kind(node, ['impl_item', 'mod_item'])  # trait is like an interface
         return res
 
     @staticmethod
@@ -51,11 +53,12 @@ class RustParser(LanguageParser):
     
     @staticmethod
     def get_docstring(node, blob):
+        logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = RustParser.get_docstring_node(node)
         docstring = []
         if docstring_node:
             for item in docstring_node:
-                doc = match_from_span(item, blob)
+                doc = get_node_text(item)
                 docstring.append(doc)
 
         docstring = '\n'.join(docstring)
@@ -63,9 +66,11 @@ class RustParser(LanguageParser):
     
     @staticmethod
     def get_function_metadata(function_node, blob) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
+            'return_type': None,
         }
         
         assert type(function_node) == tree_sitter.Node
@@ -73,26 +78,25 @@ class RustParser(LanguageParser):
         
         for child in function_node.children:
             if child.type == 'identifier':
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type in ['parameters']:
-                params = []
-                traverse_type(child, params, ['parameter', 'self_parameter'])
+                params = get_node_by_kind(child, ['parameter', 'self_parameter'])
                 for item in params:
                     if item.type == 'self_parameter':
-                        metadata['parameters'][match_from_span(item, blob)] = ''
+                        metadata['parameters'][get_node_text(item)] = ''
                         continue    
                     
                     param_name = ''
                     param_type = item.child_by_field_name('type')
                     
                     if param_type:
-                        param_type = match_from_span(param_type, blob)
+                        param_type = get_node_text(param_type)
                     else:
                         param_type = ''
 
                     for subchild in item.children:
                         if subchild.type  == 'identifier':
-                            param_name = match_from_span(subchild, blob)
+                            param_name = get_node_text(subchild)
 
                     if param_name:
                         metadata['parameters'][param_name] = param_type
@@ -101,6 +105,7 @@ class RustParser(LanguageParser):
     
     @staticmethod
     def get_class_metadata(class_node, blob):
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': [],
@@ -111,22 +116,20 @@ class RustParser(LanguageParser):
         if class_node.type == 'mod_item':
             for child in class_node.children:
                 if child.type ==  'identifier':
-                    metadata['identifier'] = match_from_span(child, blob)
+                    metadata['identifier'] = get_node_text(child)
         
         else:
-            identifier = []
-            traverse_type(class_node, identifier, ['type_identifier'])
+            identifier = get_node_by_kind(class_node, ['type_identifier'])
             
-            metadata['identifier'] = match_from_span(identifier[0], blob)
+            metadata['identifier'] = get_node_text(identifier[0])
             if len(identifier) > 1:
                 for param in identifier[1:]:
-                    metadata['parameters'].append(match_from_span(param, blob))
+                    metadata['parameters'].append(get_node_text(param))
 
         return metadata
         
 
     @staticmethod
     def get_comment_node(function_node):
-        comment_node = []
-        traverse_type(function_node, comment_node, kind='comment')
+        comment_node = get_node_by_kind(function_node, kind='comment')
         return comment_node

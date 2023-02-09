@@ -29,20 +29,6 @@ class Test_PythonParser(unittest.TestCase):
         class_list = PythonParser.get_class_list(root)
         
         self.assertEqual(len(class_list), 1)
-    
-    def test_is_function_empty(self):
-        code_sample = '''
-        def test_sample():
-            """This is a docstring"""
-            # This function is empty
-            pass
-        '''
-        root = parse_code(code_sample, 'python').root_node
-        
-        function = PythonParser.get_function_list(root)[0]
-        
-        is_empty = PythonParser.is_function_empty(function)
-        self.assertEqual(is_empty, True)
 
     def test_get_docstring(self):
         code_sample = '''
@@ -66,7 +52,9 @@ class Test_PythonParser(unittest.TestCase):
         function = list(PythonParser.get_function_list(root))[0]
         metadata = PythonParser.get_function_metadata(function, code_sample)
 
-        self.assertEqual(metadata['parameters'], ['arg1', 'arg2'])
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
+        self.assertEqual(metadata['parameters'], {'arg1': 'str', 'arg2': None})
         self.assertEqual(metadata['identifier'], 'test_sample')
 
     def test_get_class_metadata(self):
@@ -96,6 +84,49 @@ class Test_PythonParser(unittest.TestCase):
         assert comment_list[2] == '# pointer for greater element'
         assert len(comment_list) == 16
         
-
+    def test_metadata_with_return_statement(self):
+        code_sample = '''
+        def sum2num():
+            pass
+        '''
+        root = parse_code(code_sample, 'python').root_node
+        fn = PythonParser.get_function_list(root)[0]
+        metadata = PythonParser.get_function_metadata(fn)
+        
+        return_type = metadata['return_type']
+        self.assertEqual(return_type, None)
+        
+    def test_metadata_with_return_statement(self):
+        code_sample = '''
+        def sum2num():
+            return True
+        '''
+        root = parse_code(code_sample, 'python').root_node
+        fn = PythonParser.get_function_list(root)[0]
+        metadata = PythonParser.get_function_metadata(fn)
+        
+        return_type = metadata['return_type']
+        self.assertEqual(return_type, '<not_specific>')
+        
+    def test_get_parameter(self):
+        code_sample = '''
+        def sum2num(a: tree_sitter.Node=None, b=None, c:string) -> int:
+            pass
+        '''
+        
+        root = parse_code(code_sample, 'python').root_node
+        fn = PythonParser.get_function_list(root)[0]
+        
+        metadata = PythonParser.get_function_metadata(fn)
+        parameter = metadata['parameters']
+        self.assertEqual(len(parameter.keys()), 3)
+        self.assertTrue('a' in parameter.keys())
+        self.assertTrue('b' in parameter.keys())
+        self.assertTrue('c' in parameter.keys())
+        
+        return_type = metadata['return_type']
+        self.assertEqual(return_type, 'int')
+    
+    
 if __name__ == '__main__':
     unittest.main()

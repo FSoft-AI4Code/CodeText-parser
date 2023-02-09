@@ -29,10 +29,11 @@ class Test_CppParser_with_C(unittest.TestCase):
         function = CppParser.get_function_list(root)[0]
         metadata = CppParser.get_function_metadata(function, self.code_sample)
         
-
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['parameters'], {'random_seed': 'int'})
         self.assertEqual(metadata['identifier'], 'reverseSentence')
-        self.assertEqual(metadata['type'], 'void')
+        self.assertEqual(metadata['return_type'], 'void')
         
     def test_get_class_list(self):
         pass

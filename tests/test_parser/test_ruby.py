@@ -79,6 +79,8 @@ class Test_RubyParser(unittest.TestCase):
         function = RubyParser.get_function_list(root)[0]
         metadata = RubyParser.get_function_metadata(function, self.code_sample)
 
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'search')
         self.assertEqual(metadata['parameters'], ['query', 'options'])
 

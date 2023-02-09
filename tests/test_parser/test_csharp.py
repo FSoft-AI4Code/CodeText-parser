@@ -75,6 +75,8 @@ class Test_CsharpParser(unittest.TestCase):
         function = list(CsharpParser.get_function_list(root))[0]
         metadata = CsharpParser.get_function_metadata(function, self.code_sample)
 
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['parameters'], {'path': 'string', 'filename': 'string'})
         self.assertEqual(metadata['identifier'], 'GetText')
         self.assertEqual(metadata['type'], 'string')

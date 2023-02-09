@@ -1,6 +1,10 @@
 from typing import List, Dict, Any
+import logging
 
-from .language_parser import LanguageParser, match_from_span, nodes_are_equal, tokenize_code, tokenize_docstring, traverse_type
+from .language_parser import LanguageParser, get_node_text, get_node_by_kind
+
+
+logger = logging.getLogger(__name__)
 
 
 class JavascriptParser(LanguageParser):
@@ -28,23 +32,23 @@ class JavascriptParser(LanguageParser):
     
     @staticmethod
     def get_docstring(node, blob):
+        logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = JavascriptParser.get_docstring_node(node)
         
         docstring = ''
         if docstring_node:
-            docstring = match_from_span(docstring_node[0], blob)
+            docstring = get_node_text(docstring_node[0])
         return docstring
     
     @staticmethod
     def get_comment_node(function_node):
-        comment_node = []
-        traverse_type(function_node, comment_node, kind=['comment'])
+        comment_node = get_node_by_kind(function_node, kind=['comment'])
         return comment_node
     
     @staticmethod
     def get_function_list(node):
-        res = []
-        traverse_type(node, res, ['function_declaration', 'function', 'method_definition', 'generator_function_declaration'])
+        function_types = ['function_declaration', 'function', 'method_definition', 'generator_function_declaration']
+        res = get_node_by_kind(node, function_types)
         for node in res[:]:
             if not node.children:
                 res.remove(node)
@@ -53,8 +57,7 @@ class JavascriptParser(LanguageParser):
     
     @staticmethod
     def get_class_list(node):
-        res = []
-        traverse_type(node, res, ['class_declaration', 'class'])
+        res = get_node_by_kind(node, ['class_declaration', 'class'])
         for node in res[:]:
             if not node.children:
                 res.remove(node)
@@ -63,24 +66,27 @@ class JavascriptParser(LanguageParser):
 
     @staticmethod
     def get_function_metadata(function_node, blob: str) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': {},
+            'return_type': None,
         }
         param = []
         for child in function_node.children:
             if child.type in ['identifier', 'property_identifier']:
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'formal_parameters':
                 for subchild in child.children:
                     if subchild.type == 'identifier':
-                        param.append(match_from_span(subchild, blob))
+                        param.append(get_node_text(subchild))
 
         metadata['parameters'] = param
         return metadata
 
     @staticmethod
     def get_class_metadata(class_node, blob):
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',
@@ -88,11 +94,11 @@ class JavascriptParser(LanguageParser):
         param = []
         for child in class_node.children:
             if child.type == 'identifier':
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'class_heritage':
                 for subchild in child.children:
                     if subchild.type == 'identifier':
-                        param.append(match_from_span(subchild, blob))
+                        param.append(get_node_text(subchild))
                         
         metadata['parameters'] = param
         return metadata

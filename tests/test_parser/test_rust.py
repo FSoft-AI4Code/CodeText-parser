@@ -84,6 +84,8 @@ class Test_RustParser(unittest.TestCase):
         function = RustParser.get_function_list(root)[0]
         metadata = RustParser.get_function_metadata(function, self.code_sample)
 
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'long_string')
         self.assertEqual(metadata['parameters'], {'x': '&str'})
 
@@ -95,9 +97,6 @@ class Test_RustParser(unittest.TestCase):
         
         self.assertEqual(metadata['identifier'], 'Quack')
         self.assertEqual(metadata['parameters'], ['Duck'])
-
-    def test_extract_docstring(self):
-        pass
         
 
 if __name__ == '__main__':

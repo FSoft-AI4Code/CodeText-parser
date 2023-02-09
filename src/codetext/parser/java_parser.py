@@ -1,7 +1,11 @@
 import re
 from typing import List, Dict, Any
+import logging
 
-from .language_parser import LanguageParser, match_from_span, tokenize_code, tokenize_docstring, traverse_type
+from .language_parser import LanguageParser, get_node_by_kind, get_node_text
+
+
+logger = logging.getLogger(__name__)
 
 
 class JavaParser(LanguageParser):
@@ -40,11 +44,12 @@ class JavaParser(LanguageParser):
         Returns:
             str: docstring
         """
+        logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = JavaParser.get_docstring_node(node)
 
         docstring = ''
         if docstring_node:
-            docstring = match_from_span(docstring_node[0], blob)
+            docstring = get_node_text(docstring_node[0])
         return docstring
 
     @staticmethod
@@ -56,20 +61,17 @@ class JavaParser(LanguageParser):
         Return:
             List: list of comment nodes
         """
-        comment_node = []
-        traverse_type(function_node, comment_node, kind=['line_comment'])
+        comment_node = get_node_by_kind(function_node, kind=['line_comment'])
         return comment_node
     
     @staticmethod
     def get_class_list(node):
-        res = []
-        traverse_type(node, res, ['class_declaration'])
+        res = get_node_by_kind(node, ['class_declaration'])
         return res
     
     @staticmethod
     def get_function_list(node):
-        res = []
-        traverse_type(node, res, ['method_declaration'])
+        res = get_node_by_kind(node, ['method_declaration'])
         return res
     
     @staticmethod
@@ -81,6 +83,7 @@ class JavaParser(LanguageParser):
     
     @staticmethod
     def get_class_metadata(class_node, blob: str) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',
@@ -88,35 +91,35 @@ class JavaParser(LanguageParser):
         argument_list = []
         for child in class_node.children:
             if child.type == 'identifier':
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'superclass' or child.type == 'super_interfaces':
                 for subchild in child.children:
                     if subchild.type == 'type_list' or subchild.type == 'type_identifier':
-                        argument_list.append(match_from_span(subchild, blob))
+                        argument_list.append(get_node_text(subchild))
                     
         metadata['parameters'] = argument_list
         return metadata
 
     @staticmethod
     def get_function_metadata(function_node, blob: str) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',
-            'type': ''
+            'return_type': None
         }
         
         params = {}
         for child in function_node.children:
             if child.type == 'identifier':
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'type_identifier':
-                metadata['type'] = match_from_span(child, blob)
+                metadata['type'] = get_node_text(child)
             elif child.type == 'formal_parameters':
-                param_list = []
-                traverse_type(child, param_list, ['formal_parameter'])
+                param_list = get_node_by_kind(child, ['formal_parameter'])
                 for param in param_list:
-                    param_type = match_from_span(param.child_by_field_name('type'), blob)
-                    identifier = match_from_span(param.child_by_field_name('name'), blob)
+                    param_type = get_node_text(param.child_by_field_name('type'))
+                    identifier = get_node_text(param.child_by_field_name('name'))
                     params[identifier] = param_type
         
         metadata['parameters'] = params

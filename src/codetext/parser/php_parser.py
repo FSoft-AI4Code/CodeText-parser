@@ -1,8 +1,12 @@
 import re
 from typing import List, Dict, Any
 import tree_sitter
+import logging
 
-from .language_parser import LanguageParser, match_from_span, tokenize_code, tokenize_docstring, traverse_type
+from .language_parser import LanguageParser, get_node_text, get_node_by_kind
+
+
+logger = logging.getLogger(__name__)
 
 
 class PhpParser(LanguageParser):
@@ -17,11 +21,12 @@ class PhpParser(LanguageParser):
 
     @staticmethod
     def get_docstring(node, blob: str) -> str:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = PhpParser.get_docstring_node(node)
         
         docstring = ''
         if docstring_node:
-            docstring = match_from_span(docstring_node[0], blob)
+            docstring = get_node_text(docstring_node[0])
         
         return docstring
     
@@ -38,42 +43,39 @@ class PhpParser(LanguageParser):
     
     @staticmethod
     def get_comment_node(function_node):
-        comment_node = []
-        traverse_type(function_node, comment_node, kind='comment')
+        comment_node = get_node_by_kind(function_node, kind='comment')
         return comment_node
     
     @staticmethod
     def get_class_list(node):
-        res = []
-        traverse_type(node, res, ['class_declaration', 'trait_declaration'])
+        res = get_node_by_kind(node, ['class_declaration', 'trait_declaration'])
         return res
     
     @staticmethod
     def get_function_list(node):
-        res = []
-        traverse_type(node, res, ['function_definition', 'method_declaration'])
+        res = get_node_by_kind(node, ['function_definition', 'method_declaration'])
         return res
     
     @staticmethod
     def get_function_metadata(function_node, blob: str) -> Dict[str, str]:
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',
+            'return_type': None,
         }
 
         params = []
         for n in function_node.children:
             if n.type == 'name':
-                metadata['identifier'] = match_from_span(n, blob)
+                metadata['identifier'] = get_node_text(n)
             if n.type == 'union_type':
-                metadata['type'] = match_from_span(n, blob)
+                metadata['type'] = get_node_text(n)
             elif n.type == 'formal_parameters':
                 for param_node in n.children:
                     if param_node.type in ['simple_parameter', 'variadic_parameter', 'property_promotion_parameter']:
                         identifier = param_node.child_by_field_name('name')
-                        name = match_from_span(identifier, blob)
-                        if name.startswith('$'):
-                            name = name[1:]
+                        name = get_node_text(identifier)
                         params.append(name)
                         
         metadata['parameters'] = params
@@ -82,6 +84,7 @@ class PhpParser(LanguageParser):
     
     @staticmethod
     def get_class_metadata(class_node, blob):
+        logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',
@@ -90,12 +93,12 @@ class PhpParser(LanguageParser):
         
         for child in class_node.children:
             if child.type == 'name':
-                metadata['identifier'] = match_from_span(child, blob)
+                metadata['identifier'] = get_node_text(child)
             elif child.type == 'base_clause':
                 argument_list = []
                 for param in child.children:
                     if param.type == 'name':
-                        argument_list.append(match_from_span(param, blob))
+                        argument_list.append(get_node_text(param))
                 metadata['parameters'] = argument_list 
     
         return metadata

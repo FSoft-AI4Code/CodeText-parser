@@ -79,6 +79,8 @@ class Test_JavascriptParser(unittest.TestCase):
         function = JavascriptParser.get_function_list(root)[1]
         metadata = JavascriptParser.get_function_metadata(function, self.code_sample)
 
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'songsLoaded')
         self.assertEqual(metadata['parameters'], ['repos', 'username'])
 

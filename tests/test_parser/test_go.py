@@ -29,6 +29,8 @@ class Test_GoParser(unittest.TestCase):
         function = GoParser.get_function_list(root)[0]
         metadata = GoParser.get_function_metadata(function, self.code_sample)
 
+        for key in ['identifier', 'parameters', 'return_type']:
+            self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['parameters'], {'e': 'TypeError'})
         self.assertEqual(metadata['identifier'], 'Error')
         self.assertEqual(metadata['type'], 'string')
