@@ -67,8 +67,8 @@ class Test_RubyParser(unittest.TestCase):
         fn = RubyParser.get_function_list(root)[0]
         clas = RubyParser.get_class_list(root)[1]
         
-        docs1 = RubyParser.get_docstring(fn, code_sample)
-        docs2 = RubyParser.get_docstring(clas, code_sample)
+        docs1 = RubyParser.get_docstring(fn)
+        docs2 = RubyParser.get_docstring(clas)
         
         self.assertEqual(docs1, '# Search for links.\n#\n# @param query [String] The search query.\n# @option options [String, RedditKit::Subreddit] subreddit The optional subreddit to search.')
         self.assertEqual(docs2, '        comment line 1\n        comment line 2')
@@ -77,24 +77,42 @@ class Test_RubyParser(unittest.TestCase):
         root = self.root_node
         
         function = RubyParser.get_function_list(root)[0]
-        metadata = RubyParser.get_function_metadata(function, self.code_sample)
+        metadata = RubyParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'search')
         self.assertEqual(metadata['parameters'], ['query', 'options'])
+        self.assertEqual(metadata['return_type'], None)
+        
+    
+    def test_metadata_without_return_statement(self):
+        code_sample = '''
+        def write_code(number_of_errors)
+            if number_of_errors > 1
+                mood =  "Ask me later"
+            else
+                mood = puts "No Problem"
+            end  
+            return mood
+        end
+        '''
+        root = parse_code(code_sample, 'Ruby').root_node
+        fn = RubyParser.get_function_list(root)[0]
+        metadata = RubyParser.get_function_metadata(fn)
+        
+        return_type = metadata['return_type']
+        self.assertEqual(return_type, '<not_specific>')
+        
 
     def test_get_class_metadata(self):
         root = self.root_node
         
         classes = RubyParser.get_class_list(root)[1]
-        metadata = RubyParser.get_class_metadata(classes, self.code_sample)
+        metadata = RubyParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['identifier'], 'Client')
         self.assertEqual(metadata['parameters'], ['API'])
-
-    def test_extract_docstring(self):
-        pass
         
 
 if __name__ == '__main__':

@@ -70,9 +70,9 @@ class Test_RustParser(unittest.TestCase):
         fn2 = RustParser.get_function_list(root)[1]
         clas = RustParser.get_class_list(root)[0]
         
-        docs1 = RustParser.get_docstring(fn1, code_sample)
-        docs2 = RustParser.get_docstring(fn2, code_sample)
-        docs3 = RustParser.get_docstring(clas, code_sample)
+        docs1 = RustParser.get_docstring(fn1)
+        docs2 = RustParser.get_docstring(fn2)
+        docs3 = RustParser.get_docstring(clas)
         
         self.assertEqual(docs1, '/// Creates a new rendering surface.\n///\n/// # Arguments\n///\n/// Initialization of surfaces happens through the types provided by\n/// [`drm-rs`](drm).\n///\n/// - [`crtcs`](drm::control::crtc) represent scanout engines of the device pointing to one framebuffer. \\\n///     Their responsibility is to read the data of the framebuffer and export it into an "Encoder". \\\n///     The number of crtc\'s represent the number of independent output devices the hardware may handle.')
         self.assertEqual(docs2, '/**  - Outer block doc (exactly) 2 asterisks */')
@@ -82,18 +82,33 @@ class Test_RustParser(unittest.TestCase):
         root = self.root_node
         
         function = RustParser.get_function_list(root)[0]
-        metadata = RustParser.get_function_metadata(function, self.code_sample)
+        metadata = RustParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'long_string')
         self.assertEqual(metadata['parameters'], {'x': '&str'})
+        self.assertEqual(metadata['return_type'], '&str')
+    
+    def test_metadata_with_return_statement(self):
+        code_sample = '''
+        fn quack(&self) {
+            println!("quack!");
+            return "hello";
+        }
+        '''
+        root = parse_code(code_sample, 'Rust').root_node
+        fn = RustParser.get_function_list(root)[0]
+        metadata = RustParser.get_function_metadata(fn)
+        
+        return_type = metadata['return_type']
+        self.assertEqual(return_type, '<not_specific>')
 
     def test_get_class_metadata(self):
         root = self.root_node
         
         classes = RustParser.get_class_list(root)[0]
-        metadata = RustParser.get_class_metadata(classes, self.code_sample)
+        metadata = RustParser.get_class_metadata(classes)
         
         self.assertEqual(metadata['identifier'], 'Quack')
         self.assertEqual(metadata['parameters'], ['Duck'])

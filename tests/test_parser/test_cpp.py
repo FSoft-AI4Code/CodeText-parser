@@ -35,7 +35,7 @@ class Test_CppParser(unittest.TestCase):
         root = self.root_node
         
         function = list(CppParser.get_function_list(root))[0]
-        metadata = CppParser.get_function_metadata(function, self.code_sample)
+        metadata = CppParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys(), "Missing {}".format(key))
@@ -47,7 +47,7 @@ class Test_CppParser(unittest.TestCase):
         root = self.root_node
         
         classes = list(CppParser.get_class_list(root))[0]
-        metadata = CppParser.get_class_metadata(classes, self.code_sample)
+        metadata = CppParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['parameters'], ['Vehicle', 'B'])
         self.assertEqual(metadata['identifier'], 'Car')
@@ -93,8 +93,8 @@ class Test_CppParser(unittest.TestCase):
         
         fn1, fn2 = list(CppParser.get_function_list(root))
 
-        docs1 = CppParser.get_docstring(fn1, code_sample)
-        docs2 = CppParser.get_docstring(fn2, code_sample)
+        docs1 = CppParser.get_docstring(fn1)
+        docs2 = CppParser.get_docstring(fn2)
         
         self.assertEqual(docs1, '/**\n        * Find 2 sum\n        *\n        * @param nums List number.\n        * @param target Sum target.\n        * @return postion of 2 number.\n        */')
         self.assertEqual(docs2, '// Comment in\n// multiple line\n// of the function sum')

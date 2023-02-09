@@ -12,7 +12,7 @@ class CsharpParser(LanguageParser):
     BLACKLISTED_FUNCTION_NAMES = []
     
     @staticmethod
-    def get_docstring(node, blob):
+    def get_docstring(node, blob=None):
         """
         Get docstring description for node
         
@@ -22,7 +22,8 @@ class CsharpParser(LanguageParser):
         Returns:
             str: docstring
         """
-        logger.info('From version `0.0.6` this function will update argument in the API')
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = CsharpParser.get_docstring_node(node)
         docstring = '\n'.join(get_node_text(s) for s in docstring_node)
         return docstring
@@ -104,14 +105,15 @@ class CsharpParser(LanguageParser):
         return res
 
     @staticmethod
-    def get_function_metadata(function_node, blob: str) -> Dict[str, Any]:
+    def get_function_metadata(function_node, blob: str=None) -> Dict[str, Any]:
         """
         Function metadata contains:
             - identifier (str): function name
             - parameters (Dict[str, str]): parameter's name and their type (e.g: {'param_a': 'int'})
             - type (str): type
         """
-        logger.info('From version `0.0.6` this function will update argument in the API')
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
@@ -121,7 +123,7 @@ class CsharpParser(LanguageParser):
         
         for child in function_node.children:
             if child.type == 'predefined_type':
-                metadata['type'] = get_node_text(child)
+                metadata['return_type'] = get_node_text(child)
             elif child.type == 'identifier':
                 metadata['identifier'] = get_node_text(child)
             elif child.type == 'parameter_list':
@@ -135,13 +137,14 @@ class CsharpParser(LanguageParser):
         return metadata
 
     @staticmethod
-    def get_class_metadata(class_node, blob: str) -> Dict[str, str]:
+    def get_class_metadata(class_node, blob: str=None) -> Dict[str, str]:
         """
         Class metadata contains:
             - identifier (str): class's name
             - parameters (List[str]): inheritance class
         """
-        logger.info('From version `0.0.6` this function will update argument in the API')
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',

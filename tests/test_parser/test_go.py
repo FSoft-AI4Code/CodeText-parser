@@ -27,13 +27,13 @@ class Test_GoParser(unittest.TestCase):
         root = self.root_node
         
         function = GoParser.get_function_list(root)[0]
-        metadata = GoParser.get_function_metadata(function, self.code_sample)
+        metadata = GoParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['parameters'], {'e': 'TypeError'})
         self.assertEqual(metadata['identifier'], 'Error')
-        self.assertEqual(metadata['type'], 'string')
+        self.assertEqual(metadata['return_type'], 'string')
 
     def test_get_docstring(self):
         code_sample = """
@@ -61,7 +61,7 @@ class Test_GoParser(unittest.TestCase):
         
         fn = GoParser.get_function_list(root)[0]
 
-        docs = GoParser.get_docstring(fn, code_sample)
+        docs = GoParser.get_docstring(fn)
         self.assertEqual(docs, '// The path package should only be used for paths separated by forward\n// slashes, such as the paths in URLs. This package does not deal with\n// Windows paths with drive letters or backslashes; to manipulate\n// operating system paths, use the [path/filepath] package.')
         
 

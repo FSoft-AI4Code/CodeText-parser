@@ -62,8 +62,8 @@ class Test_CsharpParser(unittest.TestCase):
         
         fn1, fn2 = list(CsharpParser.get_function_list(root))
 
-        docs1 = CsharpParser.get_docstring(fn1, code_sample)
-        docs2 = CsharpParser.get_docstring(fn2, code_sample)
+        docs1 = CsharpParser.get_docstring(fn1)
+        docs2 = CsharpParser.get_docstring(fn2)
         
         self.assertEqual(docs1, '// <summary>\n// Docstring of a method\n// </summary>\n// <param name="animal_honk">Argument.</param>\n// <returns>\n// None.')
         self.assertEqual(docs2, '/* Another method docstring\n            in multiple line */')
@@ -73,19 +73,19 @@ class Test_CsharpParser(unittest.TestCase):
         root = self.root_node
         
         function = list(CsharpParser.get_function_list(root))[0]
-        metadata = CsharpParser.get_function_metadata(function, self.code_sample)
+        metadata = CsharpParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['parameters'], {'path': 'string', 'filename': 'string'})
         self.assertEqual(metadata['identifier'], 'GetText')
-        self.assertEqual(metadata['type'], 'string')
+        self.assertEqual(metadata['return_type'], 'string')
 
     def test_get_class_metadata(self):
         root = self.root_node
         
         classes = list(CsharpParser.get_class_list(root))[0]
-        metadata = CsharpParser.get_class_metadata(classes, self.code_sample)
+        metadata = CsharpParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['parameters'], ['Animal'])
         self.assertEqual(metadata['identifier'], 'Dog')

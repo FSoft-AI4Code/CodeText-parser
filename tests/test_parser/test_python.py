@@ -39,7 +39,7 @@ class Test_PythonParser(unittest.TestCase):
         root = parse_code(code_sample, 'python').root_node
         
         function = PythonParser.get_function_list(root)[0]
-        docstring = PythonParser.get_docstring(function, code_sample)
+        docstring = PythonParser.get_docstring(function)
         self.assertEqual(docstring, "This is a docstring")
 
     def test_get_function_metadata(self):
@@ -50,7 +50,7 @@ class Test_PythonParser(unittest.TestCase):
         root = parse_code(code_sample, 'python').root_node
         
         function = list(PythonParser.get_function_list(root))[0]
-        metadata = PythonParser.get_function_metadata(function, code_sample)
+        metadata = PythonParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
@@ -69,7 +69,7 @@ class Test_PythonParser(unittest.TestCase):
         root = parse_code(code_sample, 'python').root_node
         
         classes = list(PythonParser.get_class_list(root))[0]
-        metadata = PythonParser.get_class_metadata(classes, code_sample)
+        metadata = PythonParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['parameters'], ['ABC'])
         self.assertEqual(metadata['identifier'], 'Sample')
@@ -84,7 +84,7 @@ class Test_PythonParser(unittest.TestCase):
         assert comment_list[2] == '# pointer for greater element'
         assert len(comment_list) == 16
         
-    def test_metadata_with_return_statement(self):
+    def test_metadata_without_return_statement(self):
         code_sample = '''
         def sum2num():
             pass

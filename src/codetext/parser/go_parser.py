@@ -71,7 +71,7 @@ class GoParser(LanguageParser):
         return docstring_node
     
     @staticmethod
-    def get_docstring(node, blob:str):
+    def get_docstring(node, blob:str=None):
         """
         Get docstring description for node
         
@@ -81,7 +81,8 @@ class GoParser(LanguageParser):
         Returns:
             str: docstring
         """
-        logger.info('From version `0.0.6` this function will update argument in the API')
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = GoParser.get_docstring_node(node)
         docstring = '\n'.join(get_node_text(s) for s in docstring_node)
         return docstring
@@ -92,8 +93,9 @@ class GoParser(LanguageParser):
         return res
     
     @staticmethod
-    def get_function_metadata(function_node, blob: str) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_function_metadata(function_node, blob: str=None) -> Dict[str, str]:
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
@@ -104,16 +106,16 @@ class GoParser(LanguageParser):
             if child.type in ['field_identifier', 'identifier']:
                 metadata['identifier'] = get_node_text(child)
             elif child.type == 'type_identifier':
-                metadata['type'] = get_node_text(child)
+                metadata['return_type'] = get_node_text(child)
             elif child.type == 'parameter_list':
                 for subchild in child.children:
                     if subchild.type in ['parameter_declaration', 'variadic_parameter_declaration']:
                         identifier_node = subchild.child_by_field_name('name')
-                        param_type = get_node_text(subchild.child_by_field_name('type'))
                         
                         if not identifier_node:
                             continue
                         
+                        param_type = get_node_text(subchild.child_by_field_name('type'))
                         identifier = get_node_text(identifier_node)
                         if identifier and param_type:
                             metadata['parameters'][identifier] = param_type
@@ -125,6 +127,7 @@ class GoParser(LanguageParser):
         pass
     
     @staticmethod
-    def get_class_metadata(class_node, blob) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_class_metadata(class_node, blob=None) -> Dict[str, str]:
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         pass

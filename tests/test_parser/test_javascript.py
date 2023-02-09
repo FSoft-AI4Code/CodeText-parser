@@ -67,8 +67,8 @@ class Test_JavascriptParser(unittest.TestCase):
         fn1, fn2 = JavascriptParser.get_function_list(root)
         
 
-        docs1 = JavascriptParser.get_docstring(fn1, code_sample)
-        docs2 = JavascriptParser.get_docstring(fn2, code_sample)
+        docs1 = JavascriptParser.get_docstring(fn1)
+        docs2 = JavascriptParser.get_docstring(fn2)
         
         self.assertEqual(docs1, '/**\n        * Dispatched when the repositories are loaded by the request saga\n        *\n        * @param  {array} repos The repository data\n        * @param  {string} username The current username\n        *\n        * @return {object}      An action object with a type of LOAD_REPOS_SUCCESS passing the repos\n        */')
         self.assertEqual(docs2, '/**\n            * Present the object Car\n            *\n            * @return {None}\n            */')
@@ -77,18 +77,31 @@ class Test_JavascriptParser(unittest.TestCase):
         root = self.root_node
         
         function = JavascriptParser.get_function_list(root)[1]
-        metadata = JavascriptParser.get_function_metadata(function, self.code_sample)
+        metadata = JavascriptParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'songsLoaded')
-        self.assertEqual(metadata['parameters'], ['repos', 'username'])
+        self.assertEqual(metadata['parameters'], {'repos': None, 'username': None})
+        
+    def test_metadata_with_return_statement(self):
+        code_sample = '''
+        function myFunction(p1, p2) {
+            return p1 * p2;
+        }
+        '''
+        root = parse_code(code_sample, 'javascript').root_node
+        fn = JavascriptParser.get_function_list(root)[0]
+        metadata = JavascriptParser.get_function_metadata(fn)
+        
+        return_type = metadata['return_type']
+        self.assertEqual(return_type, '<not_specific>')
 
     def test_get_class_metadata(self):
         root = self.root_node
         
         classes = JavascriptParser.get_class_list(root)[0]
-        metadata = JavascriptParser.get_class_metadata(classes, self.code_sample)
+        metadata = JavascriptParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['identifier'], 'Model')
         self.assertEqual(metadata['parameters'], ['Car'])

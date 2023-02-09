@@ -53,7 +53,7 @@ class Test_JavaParser(unittest.TestCase):
         
         fn = list(JavaParser.get_function_list(root))[0]
 
-        docs = JavaParser.get_docstring(fn, code_sample)
+        docs = JavaParser.get_docstring(fn)
         self.assertEqual(docs, '/**\n            * Adds new user and saves to file.\n            *\n            * @param context instance of Context\n            * @param user instance of User\n            * @see User\n            */')
         
 
@@ -61,19 +61,19 @@ class Test_JavaParser(unittest.TestCase):
         root = self.root_node
         
         function = list(JavaParser.get_function_list(root))[0]
-        metadata = JavaParser.get_function_metadata(function, self.code_sample)
+        metadata = JavaParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['parameters'], {'context': 'Context', 'userIndex': 'int'})
         self.assertEqual(metadata['identifier'], 'getHabitList')
-        self.assertEqual(metadata['type'], 'HabitList')
+        self.assertEqual(metadata['return_type'], 'HabitList')
 
     def test_get_class_metadata(self):
         root = self.root_node
         
         classes = list(JavaParser.get_class_list(root))[0]
-        metadata = JavaParser.get_class_metadata(classes, self.code_sample)
+        metadata = JavaParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['parameters'], ['SudoUser', 'FileController'])
         self.assertEqual(metadata['identifier'], 'SaveFileController')

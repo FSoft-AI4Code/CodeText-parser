@@ -55,7 +55,7 @@ class Test_PhpParser(unittest.TestCase):
         
         fn = PhpParser.get_function_list(root)[0]
 
-        docs = PhpParser.get_docstring(fn, code_sample)
+        docs = PhpParser.get_docstring(fn)
         
         self.assertEqual(docs, '/**\n        * Get all image nodes.\n        *\n        * @param \\DOMNode     $node       The \\DOMDocument instance\n        * @param boolean      $strict     If the document has to be valid\n        *\n        * @return \\DOMNode\n        */')
         
@@ -64,19 +64,48 @@ class Test_PhpParser(unittest.TestCase):
         root = self.root_node
         
         function = list(PhpParser.get_function_list(root))[1]
-        metadata = PhpParser.get_function_metadata(function, self.code_sample)
+        metadata = PhpParser.get_function_metadata(function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
-        self.assertEqual(metadata['parameters'], ['$params', '$connectionOptions'])
+        self.assertEqual(metadata['parameters'],  {'$params': 'array', '$connectionOptions': 'array'})
         self.assertEqual(metadata['identifier'], 'constructDsn')
-        self.assertEqual(metadata['type'], 'string')
+        self.assertEqual(metadata['return_type'], 'string')
+        
+    def test_metadata_with_return_statement(self):
+        code_sample = '''
+        <?php
+        function sum($a, $b): {
+            return $a + $b;
+        }
+        ?>
+        '''
+        root = parse_code(code_sample, 'PHP').root_node
+        fn = PhpParser.get_function_list(root)[0]
+        metadata = PhpParser.get_function_metadata(fn)
+        
+        return_type = metadata['return_type']
+        self.assertEqual(return_type, '<not_specific>')
+
+    def test_metadata_without_return_statement(self):
+        code_sample = '''
+        <?php
+        function sum($a, $b): {
+        }
+        ?>
+        '''
+        root = parse_code(code_sample, 'PHP').root_node
+        fn = PhpParser.get_function_list(root)[0]
+        metadata = PhpParser.get_function_metadata(fn)
+        
+        return_type = metadata['return_type']
+        self.assertEqual(return_type, None)
 
     def test_get_class_metadata(self):
         root = self.root_node
         
         classes = list(PhpParser.get_class_list(root))[0]
-        metadata = PhpParser.get_class_metadata(classes, self.code_sample)
+        metadata = PhpParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['parameters'], ['AbstractSQLServerDriver'])
         self.assertEqual(metadata['identifier'], 'Driver')

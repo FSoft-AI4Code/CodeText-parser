@@ -13,8 +13,9 @@ class PythonParser(LanguageParser):
     BLACKLISTED_FUNCTION_NAMES = ['__init__', '__name__', '__main__']
     
     @staticmethod
-    def get_docstring(node, blob):
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_docstring(node, blob:str=None):
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = PythonParser.get_docstring_node(node)
         
         docstring = ''
@@ -61,7 +62,8 @@ class PythonParser(LanguageParser):
     
     @staticmethod
     def get_function_metadata(function_node, blob: str=None) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
@@ -98,8 +100,9 @@ class PythonParser(LanguageParser):
         return metadata
 
     @staticmethod
-    def get_class_metadata(class_node, blob: str) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_class_metadata(class_node, blob: str=None) -> Dict[str, str]:
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': [],

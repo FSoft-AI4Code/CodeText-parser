@@ -13,7 +13,7 @@ class CppParser(LanguageParser):
     BLACKLISTED_FUNCTION_NAMES = ['main', 'constructor']
     
     @staticmethod
-    def get_docstring(node, blob):
+    def get_docstring(node, blob=None):
         """
         Get docstring description for node
         
@@ -23,7 +23,8 @@ class CppParser(LanguageParser):
         Returns:
             str: docstring
         """
-        logger.info('From version `0.0.6` this function will update argument in the API')
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = CppParser.get_docstring_node(node)
         docstring = '\n'.join(get_node_text(s) for s in docstring_node)
         return docstring
@@ -99,14 +100,15 @@ class CppParser(LanguageParser):
         return comment_node
     
     @staticmethod
-    def get_function_metadata(function_node, blob: str) -> Dict[str, Any]:
+    def get_function_metadata(function_node, blob: str=None) -> Dict[str, Any]:
         """
         Function metadata contains:
             - identifier (str): function name
             - parameters (Dict[str, str]): parameter's name and their type (e.g: {'param_a': 'int'})
             - return_type (str or NoneType): function's return type
         """
-        logger.info('From version `0.0.6` this function will update argument in the API')
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
@@ -118,29 +120,41 @@ class CppParser(LanguageParser):
             if child.type in ['primitive_type', 'type_identifier']:
                 metadata['return_type'] = get_node_text(child)
                 # search for "function_declarator"
-            elif child.type == 'function_declarator':
+            elif child.type == 'pointer_declarator':
+                for subchild in child.children:
+                    if subchild.type == 'function_declarator':
+                        child = subchild
+            if child.type == 'function_declarator':
                 for subchild in child.children:
                     if subchild.type in ['qualified_identifier', 'identifier']:
                         metadata['identifier'] = get_node_text(subchild)
                     elif subchild.type == 'parameter_list':
                         param_nodes = get_node_by_kind(subchild, ['parameter_declaration'])
                         for param in param_nodes:
-                            for item in param.children:
-                                if item.type in ['type_identifier', 'primitive_type']:
-                                    param_type = get_node_text(item)
-                                elif item.type == 'identifier':
-                                    param_identifier = get_node_text(item)
-                            metadata['parameters'][param_identifier] = param_type
+                            param_type = param.child_by_field_name('type')
+                            param_type = get_node_text(param_type)
+                            list_name = get_node_by_kind(param, ['identifier'])
+                            assert len(list_name) == 1
+                            param_name = get_node_text(list_name[0])
+                            metadata['parameters'][param_name] = param_type
+                            # for item in param.children:
+                                
+                            #     if item.type in ['type_identifier', 'primitive_type']:
+                            #         param_type = get_node_text(item)
+                            #     elif item.type == 'identifier':
+                            #         param_identifier = get_node_text(item)
 
         return metadata
 
     @staticmethod
-    def get_class_metadata(class_node, blob: str) -> Dict[str, str]:
+    def get_class_metadata(class_node, blob: str=None) -> Dict[str, str]:
         """
         Class metadata contains:
             - identifier (str): class's name
             - parameters (List[str]): inheritance class
         """
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',

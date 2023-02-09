@@ -27,7 +27,7 @@ class Test_CppParser_with_C(unittest.TestCase):
         root = self.root_node
         
         function = CppParser.get_function_list(root)[0]
-        metadata = CppParser.get_function_metadata(function, self.code_sample)
+        metadata = CppParser.get_function_metadata(function)
         
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
@@ -63,7 +63,7 @@ class Test_CppParser_with_C(unittest.TestCase):
         
         fn= CppParser.get_function_list(root)[0]
 
-        docs = CppParser.get_docstring(fn, code_sample)
+        docs = CppParser.get_docstring(fn)
         
         self.assertEqual(docs, '/**\n        * A brief description. A more elaborate class description\n        * @param random_seed somearg.\n        * @see Test()\n        * @return The test results\n        */')
         

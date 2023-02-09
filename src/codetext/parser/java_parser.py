@@ -34,7 +34,7 @@ class JavaParser(LanguageParser):
         return docstring_node
 
     @staticmethod
-    def get_docstring(node, blob):
+    def get_docstring(node, blob=None):
         """
         Get docstring description for node
         
@@ -44,7 +44,8 @@ class JavaParser(LanguageParser):
         Returns:
             str: docstring
         """
-        logger.info('From version `0.0.6` this function will update argument in the API')
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = JavaParser.get_docstring_node(node)
 
         docstring = ''
@@ -82,8 +83,9 @@ class JavaParser(LanguageParser):
                     return True
     
     @staticmethod
-    def get_class_metadata(class_node, blob: str) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_class_metadata(class_node, blob: str=None) -> Dict[str, str]:
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',
@@ -101,26 +103,25 @@ class JavaParser(LanguageParser):
         return metadata
 
     @staticmethod
-    def get_function_metadata(function_node, blob: str) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_function_metadata(function_node, blob: str=None) -> Dict[str, str]:
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': {},
             'return_type': None
         }
         
-        params = {}
         for child in function_node.children:
             if child.type == 'identifier':
                 metadata['identifier'] = get_node_text(child)
             elif child.type == 'type_identifier':
-                metadata['type'] = get_node_text(child)
+                metadata['return_type'] = get_node_text(child)
             elif child.type == 'formal_parameters':
-                param_list = get_node_by_kind(child, ['formal_parameter'])
+                param_list = get_node_by_kind(child, ['formal_parameter'])  # speed_parameter
                 for param in param_list:
                     param_type = get_node_text(param.child_by_field_name('type'))
                     identifier = get_node_text(param.child_by_field_name('name'))
-                    params[identifier] = param_type
+                    metadata['parameters'][identifier] = param_type
         
-        metadata['parameters'] = params
         return metadata

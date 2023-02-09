@@ -52,8 +52,9 @@ class RustParser(LanguageParser):
         return docstring_node
     
     @staticmethod
-    def get_docstring(node, blob):
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_docstring(node, blob=None):
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = RustParser.get_docstring_node(node)
         docstring = []
         if docstring_node:
@@ -65,8 +66,9 @@ class RustParser(LanguageParser):
         return docstring
     
     @staticmethod
-    def get_function_metadata(function_node, blob) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_function_metadata(function_node, blob=None) -> Dict[str, str]:
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
@@ -80,32 +82,42 @@ class RustParser(LanguageParser):
             if child.type == 'identifier':
                 metadata['identifier'] = get_node_text(child)
             elif child.type in ['parameters']:
-                params = get_node_by_kind(child, ['parameter', 'self_parameter'])
+                params = get_node_by_kind(child, ['parameter', 'variadic_parameter', 'self_parameter'])
                 for item in params:
                     if item.type == 'self_parameter':
-                        metadata['parameters'][get_node_text(item)] = ''
-                        continue    
+                        metadata['parameters'][get_node_text(item)] = None
                     
-                    param_name = ''
-                    param_type = item.child_by_field_name('type')
-                    
-                    if param_type:
-                        param_type = get_node_text(param_type)
                     else:
-                        param_type = ''
+                        # param_name = ''
+                        for subchild in item.children:
+                            if subchild.type == 'identifier':
+                                param_name = get_node_text(subchild)
+                                break
+                        param_type = item.child_by_field_name('type')
+                        
+                        if param_type:
+                            param_type = get_node_text(param_type)
+                            metadata['parameters'][param_name] = param_type
+                        else:
+                            metadata['parameters'][param_name] = None
+                            param_type = None
 
-                    for subchild in item.children:
-                        if subchild.type  == 'identifier':
-                            param_name = get_node_text(subchild)
-
-                    if param_name:
-                        metadata['parameters'][param_name] = param_type
-
+            if child.type == 'reference_type':
+                metadata['return_type'] = get_node_text(child)
+            
+            if not metadata['return_type']:
+                return_statement = get_node_by_kind(function_node, ['return_expression'])
+                if len(return_statement) > 0:
+                    metadata['return_type'] = '<not_specific>'
+                else:
+                    metadata['return_type'] = None
+                
         return metadata
     
     @staticmethod
-    def get_class_metadata(class_node, blob):
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_class_metadata(class_node, blob=None):
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': [],

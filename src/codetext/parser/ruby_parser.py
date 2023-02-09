@@ -61,8 +61,9 @@ class RubyParser(LanguageParser):
         return docstring_node
     
     @staticmethod
-    def get_docstring(node, blob):
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_docstring(node, blob=None):
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = RubyParser.get_docstring_node(node)
         docstring = []
         for item in docstring_node:
@@ -77,8 +78,9 @@ class RubyParser(LanguageParser):
         return docstring
     
     @staticmethod
-    def get_function_metadata(function_node, blob) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_function_metadata(function_node, blob=None) -> Dict[str, str]:
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': [],
@@ -96,11 +98,19 @@ class RubyParser(LanguageParser):
                 for item in params:
                     metadata['parameters'].append(get_node_text(item))
 
+        if not metadata['return_type']:
+            return_statement = get_node_by_kind(function_node, ['return'])
+            if len(return_statement) > 0:
+                metadata['return_type'] = '<not_specific>'
+            else:
+                metadata['return_type'] = None
+
         return metadata
     
     @staticmethod
-    def get_class_metadata(class_node, blob):
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_class_metadata(class_node, blob=None):
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': [],

@@ -31,8 +31,9 @@ class JavascriptParser(LanguageParser):
         return docstring_node
     
     @staticmethod
-    def get_docstring(node, blob):
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_docstring(node, blob=None):
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         docstring_node = JavascriptParser.get_docstring_node(node)
         
         docstring = ''
@@ -65,8 +66,9 @@ class JavascriptParser(LanguageParser):
         return res
 
     @staticmethod
-    def get_function_metadata(function_node, blob: str) -> Dict[str, str]:
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_function_metadata(function_node, blob: str=None) -> Dict[str, str]:
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
@@ -77,16 +79,20 @@ class JavascriptParser(LanguageParser):
             if child.type in ['identifier', 'property_identifier']:
                 metadata['identifier'] = get_node_text(child)
             elif child.type == 'formal_parameters':
-                for subchild in child.children:
-                    if subchild.type == 'identifier':
-                        param.append(get_node_text(subchild))
-
-        metadata['parameters'] = param
+                params = get_node_by_kind(child, ['identifier'])
+                for param in params:
+                    identifier = get_node_text(param)
+                    metadata['parameters'][identifier] = None  # JS not have type define
+        
+        return_statement = get_node_by_kind(function_node, ['return_statement'])
+        if len(return_statement) > 0:
+            metadata['return_type'] = '<not_specific>'
         return metadata
 
     @staticmethod
-    def get_class_metadata(class_node, blob):
-        logger.info('From version `0.0.6` this function will update argument in the API')
+    def get_class_metadata(class_node, blob=None):
+        if blob:
+            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': '',
