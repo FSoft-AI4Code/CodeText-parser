@@ -105,15 +105,13 @@ class CsharpParser(LanguageParser):
         return res
 
     @staticmethod
-    def get_function_metadata(function_node, blob: str=None) -> Dict[str, Any]:
+    def get_function_metadata(function_node, blob: str = None) -> Dict[str, Any]:
         """
         Function metadata contains:
             - identifier (str): function name
             - parameters (Dict[str, str]): parameter's name and their type (e.g: {'param_a': 'int'})
             - type (str): type
         """
-        if blob:
-            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
@@ -122,10 +120,13 @@ class CsharpParser(LanguageParser):
         assert type(function_node) == tree_sitter.Node
         
         for child in function_node.children:
-            if child.type == 'predefined_type':
+            if child.type in ['predefined_type', 'generic_name']:
                 metadata['return_type'] = get_node_text(child)
             elif child.type == 'identifier':
-                metadata['identifier'] = get_node_text(child)
+                if child.next_named_sibling.type != 'parameter_list':
+                    metadata['return_type'] = get_node_text(child)
+                else:
+                    metadata['identifier'] = get_node_text(child)
             elif child.type == 'parameter_list':
                 for param_node in child.children:
                     param_nodes = get_node_by_kind(param_node, ['parameter'])
