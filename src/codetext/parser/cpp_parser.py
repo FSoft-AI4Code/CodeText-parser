@@ -126,7 +126,7 @@ class CppParser(LanguageParser):
                         child = subchild
             if child.type == 'function_declarator':
                 for subchild in child.children:
-                    if subchild.type in ['qualified_identifier', 'identifier']:
+                    if subchild.type in ['qualified_identifier', 'identifier', 'field_identifier']:
                         metadata['identifier'] = get_node_text(subchild)
                     elif subchild.type == 'parameter_list':
                         param_nodes = get_node_by_kind(subchild, ['parameter_declaration'])
