@@ -111,13 +111,10 @@ class PythonParser(LanguageParser):
             if child.type == 'identifier':
                 metadata['identifier'] = get_node_text(child)
             elif child.type == 'argument_list':
-                args = []
                 argument_list = get_node_text(child).split(',')
                 for arg in argument_list:
                     item = re.sub(r'[^a-zA-Z0-9\_]', ' ', arg).split()
-                    if len(item) > 0:
-                        args.append(item[0].strip())
-                metadata['parameters'][args] = None
+                    metadata['parameters'][item[0].strip()] = None
 
         # get __init__ function
         return metadata

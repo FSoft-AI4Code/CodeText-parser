@@ -107,7 +107,7 @@ class Test_PhpParser(unittest.TestCase):
         classes = list(PhpParser.get_class_list(root))[0]
         metadata = PhpParser.get_class_metadata(classes)
 
-        self.assertEqual(metadata['parameters'], ['AbstractSQLServerDriver'])
+        self.assertEqual(metadata['parameters'], {'AbstractSQLServerDriver': None})
         self.assertEqual(metadata['identifier'], 'Driver')
         
 
