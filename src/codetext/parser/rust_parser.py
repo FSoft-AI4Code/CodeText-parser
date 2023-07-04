@@ -88,9 +88,12 @@ class RustParser(LanguageParser):
                         metadata['parameters'][get_node_text(item)] = None
                     
                     else:
-                        # param_name = ''
+                        param_name = ''
                         for subchild in item.children:
-                            if subchild.type == 'identifier':
+                            if subchild.type == 'mutable_specifier':
+                                param_name = 'self'
+                                break
+                            elif subchild.type == 'identifier':
                                 param_name = get_node_text(subchild)
                                 break
                         param_type = item.child_by_field_name('type')
@@ -120,7 +123,7 @@ class RustParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': [],
+            'parameters': {},
         }
         
         assert type(class_node) == tree_sitter.Node
@@ -136,12 +139,12 @@ class RustParser(LanguageParser):
             metadata['identifier'] = get_node_text(identifier[0])
             if len(identifier) > 1:
                 for param in identifier[1:]:
-                    metadata['parameters'].append(get_node_text(param))
+                    metadata['parameters'][get_node_text(param)] = None
 
         return metadata
         
 
     @staticmethod
     def get_comment_node(function_node):
-        comment_node = get_node_by_kind(function_node, kind='comment')
+        comment_node = get_node_by_kind(function_node, kind=['comment', 'line_comment', 'block_comment'])
         return comment_node

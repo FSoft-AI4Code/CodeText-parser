@@ -105,7 +105,7 @@ class PythonParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': [],
+            'parameters': {},
         }
         for child in class_node.children:
             if child.type == 'identifier':
@@ -117,7 +117,7 @@ class PythonParser(LanguageParser):
                     item = re.sub(r'[^a-zA-Z0-9\_]', ' ', arg).split()
                     if len(item) > 0:
                         args.append(item[0].strip())
-                metadata['parameters'] = args
+                metadata['parameters'][args] = None
 
         # get __init__ function
         return metadata

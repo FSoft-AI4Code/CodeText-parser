@@ -20,7 +20,7 @@ class GoParser(LanguageParser):
         Return:
             List: list of comment nodes
         """
-        comment_node = get_node_by_kind(function_node, comment_node, kind='comment')
+        comment_node = get_node_by_kind(function_node, kind='comment')
         return comment_node
     
     @staticmethod

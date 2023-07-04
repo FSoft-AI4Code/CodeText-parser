@@ -10,7 +10,8 @@ from .python_parser import PythonParser
 from .cpp_parser import CppParser
 from .c_sharp_parser import CsharpParser
 from .rust_parser import RustParser
-from .language_parser import LanguageParser
+from .language_parser import LanguageParser, get_node_by_kind, get_node_text, \
+    tokenize_code, tokenize_docstring, nodes_are_equal
 
 __all__ = [
     'GoParser', 'PhpParser', 'RubyParser', 'JavaParser', 'JavascriptParser',

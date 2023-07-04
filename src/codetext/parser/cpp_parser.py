@@ -134,7 +134,8 @@ class CppParser(LanguageParser):
                             param_type = param.child_by_field_name('type')
                             param_type = get_node_text(param_type)
                             list_name = get_node_by_kind(param, ['identifier'])
-                            assert len(list_name) == 1
+                            if not list_name:
+                                continue
                             param_name = get_node_text(list_name[0])
                             metadata['parameters'][param_name] = param_type
                             # for item in param.children:
@@ -157,7 +158,7 @@ class CppParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': {},
         }
         assert type(class_node) == tree_sitter.Node
         
@@ -168,7 +169,8 @@ class CppParser(LanguageParser):
                 argument_list = []
                 for param in child.children:
                     if param.type == 'type_identifier':
-                        argument_list.append(get_node_text(param))
-                metadata['parameters'] = argument_list
+                        metadata['parameters'][get_node_text(param)] = None
+                        # argument_list.append(get_node_text(param))
+                # metadata['parameters'] = argument_list
 
         return metadata
