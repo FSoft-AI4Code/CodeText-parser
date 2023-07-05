@@ -70,10 +70,18 @@ Release data: Dec 12, 2022
 
 Version 0.0.6
 =============
-Release data: Jan 9, 2022
+Release data: Jan 9, 2023
 
 * Add tree sitter utils (in codetext.parser)
 * Replace all `match_from_span` to `get_node_text`
 * Replace all `traverse_type` to `get_node_by_kind`
 * Fix `CppParser.get_function_metadata` missing `param_type` and `param_identifier`
 * Update return metadata from all parser
+
+Version 0.0.7
+=============
+Release data: Jul 5, 2023
+
+* Update all class extractor format (using dict instead of list)
+* Fix missing identifier, parameter in C, C#, Java parser
+* Implement CLI
