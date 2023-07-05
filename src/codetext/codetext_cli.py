@@ -112,13 +112,13 @@ def print_result(res: Dict, file_name: str = "no_name_file"):
         
     if cls_info:
         print("Class summary:")
-        print(tabulate(cls_info, headers=cls_headers, tablefmt='fancy_grid'))
+        print(tabulate(cls_info, headers=cls_headers, tablefmt='outline'))
         print("\n")
         
         for _, info in method_info.items():
             name, info = info
             print("Class analyse: {name}".format(name=name))
-            print(tabulate(info, headers=cls_method_headers, tablefmt='rst'))
+            print(tabulate(info, headers=cls_method_headers, tablefmt='outline'))
             print("\n")
         
     # ========= Print stand alone function =========
@@ -140,7 +140,7 @@ def print_result(res: Dict, file_name: str = "no_name_file"):
         
     if function_info:
         print("Function analyse:")
-        print(tabulate(function_info, headers=fn_headers, tablefmt='rst'))
+        print(tabulate(function_info, headers=fn_headers, tablefmt='outline'))
         print("\n")
 
     elif not method_info:
