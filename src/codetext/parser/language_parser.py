@@ -229,12 +229,12 @@ class LanguageParser(ABC):
     
     @staticmethod
     @abstractmethod
-    def get_class_metadata(class_node, blob):
+    def get_class_metadata(class_node, blob=None):
         pass
 
     @staticmethod
     @abstractmethod
-    def get_function_metadata(function_node, blob) -> Dict[str, str]:
+    def get_function_metadata(function_node, blob=None) -> Dict[str, str]:
         pass
     
     

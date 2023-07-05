@@ -12,6 +12,11 @@ from .c_sharp_parser import CsharpParser
 from .rust_parser import RustParser
 from .language_parser import LanguageParser, get_node_by_kind, get_node_text, \
     tokenize_code, tokenize_docstring, nodes_are_equal
+    
+SUPPORT_LANGUAGE = [
+    "go", "php", "ruby", "java", "javascript", 
+    "python", "cpp", "c", "c_sharp", "rust"
+]
 
 __all__ = [
     'GoParser', 'PhpParser', 'RubyParser', 'JavaParser', 'JavascriptParser',
