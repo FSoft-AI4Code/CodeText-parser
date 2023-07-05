@@ -3,7 +3,7 @@ import sys
 import argparse
 import pkg_resources
 
-from tqdm import tqdm
+import json
 from .codetext_cli import parse_file, print_result, PL_MATCHING
 
 
@@ -18,9 +18,7 @@ def get_args():
                         help='''Target the programming languages you want to
                         analyze.''')
     parser.add_argument("-o", "--output_file",
-                        help='''Output file. The output format is inferred
-                        from the file extension (e.g. .html), unless it is
-                        explicitly specified (e.g. using --xml).
+                        help='''Output file (e.g report.json).
                         ''',
                         type=str)
     parser.add_argument("--json",
@@ -36,6 +34,17 @@ def get_args():
 
 def main():
     opt = get_args()
+    
+    # check args
+    if opt.json:
+        if not opt.output_file: 
+            raise ValueError("Missing --output_file")
+    if opt.language:
+        if opt.language not in PL_MATCHING.keys():
+            raise ValueError(
+                "{language} not supported. Currently support {sp_language}"
+                .format(language=opt.language, 
+                        sp_language=list(PL_MATCHING.keys())))
     
     # check path
     for path in opt.paths:
@@ -74,7 +83,10 @@ def main():
     
     if opt.json:
         save_path = opt.output_file
-        
+        with open(save_path, 'w') as output_file:
+            json.dump(output_metadata, output_file, sort_keys=True, indent=4)
+            print(50*'=')
+            print("Save report to {path}".format(path=save_path))
 
 
 if __name__ == '__main__':
