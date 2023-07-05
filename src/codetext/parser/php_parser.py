@@ -99,7 +99,7 @@ class PhpParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': {},
         }
         assert type(class_node) == tree_sitter.Node
         
@@ -110,7 +110,9 @@ class PhpParser(LanguageParser):
                 argument_list = []
                 for param in child.children:
                     if param.type == 'name':
-                        argument_list.append(get_node_text(param))
-                metadata['parameters'] = argument_list 
+                        name = get_node_text(param)
+                        metadata['parameters'][name] = None
+                        # argument_list.append(get_node_text(param))
+                # metadata['parameters'] = argument_list 
     
         return metadata

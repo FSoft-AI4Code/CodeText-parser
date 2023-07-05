@@ -104,7 +104,7 @@ class Test_JavascriptParser(unittest.TestCase):
         metadata = JavascriptParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['identifier'], 'Model')
-        self.assertEqual(metadata['parameters'], ['Car'])
+        self.assertEqual(metadata['parameters'], {'Car': None})
 
     def test_extract_docstring(self):
         pass

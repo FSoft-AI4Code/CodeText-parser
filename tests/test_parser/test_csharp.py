@@ -87,7 +87,7 @@ class Test_CsharpParser(unittest.TestCase):
         classes = list(CsharpParser.get_class_list(root))[0]
         metadata = CsharpParser.get_class_metadata(classes)
 
-        self.assertEqual(metadata['parameters'], ['Animal'])
+        self.assertEqual(metadata['parameters'], {'Animal': None})
         self.assertEqual(metadata['identifier'], 'Dog')
 
 

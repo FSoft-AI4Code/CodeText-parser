@@ -105,15 +105,13 @@ class CsharpParser(LanguageParser):
         return res
 
     @staticmethod
-    def get_function_metadata(function_node, blob: str=None) -> Dict[str, Any]:
+    def get_function_metadata(function_node, blob: str = None) -> Dict[str, Any]:
         """
         Function metadata contains:
             - identifier (str): function name
             - parameters (Dict[str, str]): parameter's name and their type (e.g: {'param_a': 'int'})
             - type (str): type
         """
-        if blob:
-            logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
             'parameters': {},
@@ -122,18 +120,35 @@ class CsharpParser(LanguageParser):
         assert type(function_node) == tree_sitter.Node
         
         for child in function_node.children:
-            if child.type == 'predefined_type':
+            if child.type in ['predefined_type', 'generic_name']:
                 metadata['return_type'] = get_node_text(child)
             elif child.type == 'identifier':
-                metadata['identifier'] = get_node_text(child)
+                if child.next_named_sibling.type != 'parameter_list':
+                    metadata['return_type'] = get_node_text(child)
+                else:
+                    metadata['identifier'] = get_node_text(child)
             elif child.type == 'parameter_list':
                 for param_node in child.children:
                     param_nodes = get_node_by_kind(param_node, ['parameter'])
                     for param in param_nodes:
-                        param_type = get_node_text(param.children[0])
-                        param_identifier = get_node_text(param.children[1])
-                    
-                        metadata['parameters'][param_identifier] = param_type
+                        if len(param.children) > 1:
+                            param_type = get_node_text(param.children[0])
+                            param_name = get_node_text(param.children[1])
+                            metadata['parameters'][param_name] = param_type
+                        
+                        else:
+                            param_name = get_node_text(param.children[0])
+                            metadata['parameters'][param_name] = None
+                        # for node in param.children:
+                        #     if node.type in ['array_type', 'implicit_type', \
+                        #         'nullable_type', 'pointer_type', 'function_pointer_type', \
+                        #         'predefined_type', 'tuple_type']:
+                        #         param_type = get_node_text(node)
+                        #     elif node.type == 'identifier':
+                        #         param_identifier = get_node_text(node)
+                                
+                        # param_type = get_node_text(param.child_by_field_name('type'))
+                        # param_identifier = get_node_text(param.child_by_field_name('name'))
         return metadata
 
     @staticmethod
@@ -147,7 +162,7 @@ class CsharpParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': {},
         }
         assert type(class_node) == tree_sitter.Node
         
@@ -155,11 +170,11 @@ class CsharpParser(LanguageParser):
             if child.type == 'identifier':
                 metadata['identifier'] = get_node_text(child)
             elif child.type == 'base_list':
-                argument_list = []
                 for arg in child.children:
                     if arg.type == 'identifier':
-                        argument_list.append(get_node_text(arg))
-                metadata['parameters'] = argument_list
+                        metadata['parameters'][get_node_text(arg)] = None
+                        # argument_list.append(get_node_text(arg))
+                # metadata['parameters'] = argument_list
 
         return metadata
     

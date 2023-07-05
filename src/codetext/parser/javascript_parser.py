@@ -95,7 +95,7 @@ class JavascriptParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': {},
         }
         param = []
         for child in class_node.children:
@@ -104,7 +104,8 @@ class JavascriptParser(LanguageParser):
             elif child.type == 'class_heritage':
                 for subchild in child.children:
                     if subchild.type == 'identifier':
-                        param.append(get_node_text(subchild))
+                        metadata['parameters'][get_node_text(subchild)] = None
+                        # param.append(get_node_text(subchild))
                         
-        metadata['parameters'] = param
+        # metadata['parameters'] = param
         return metadata
