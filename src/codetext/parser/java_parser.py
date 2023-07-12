@@ -88,7 +88,7 @@ class JavaParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': {},
         }
         argument_list = []
         for child in class_node.children:
@@ -97,9 +97,10 @@ class JavaParser(LanguageParser):
             elif child.type == 'superclass' or child.type == 'super_interfaces':
                 for subchild in child.children:
                     if subchild.type == 'type_list' or subchild.type == 'type_identifier':
-                        argument_list.append(get_node_text(subchild))
+                        metadata['parameters'][get_node_text(subchild)] = None
+                        # argument_list.append(get_node_text(subchild))
                     
-        metadata['parameters'] = argument_list
+        # metadata['parameters'] = argument_list
         return metadata
 
     @staticmethod

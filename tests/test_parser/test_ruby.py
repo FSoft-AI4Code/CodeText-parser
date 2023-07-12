@@ -82,7 +82,7 @@ class Test_RubyParser(unittest.TestCase):
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'search')
-        self.assertEqual(metadata['parameters'], ['query', 'options'])
+        self.assertEqual(metadata['parameters'], {'query': None, 'options': None})
         self.assertEqual(metadata['return_type'], None)
         
     
@@ -112,7 +112,7 @@ class Test_RubyParser(unittest.TestCase):
         metadata = RubyParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['identifier'], 'Client')
-        self.assertEqual(metadata['parameters'], ['API'])
+        self.assertEqual(metadata['parameters'], {'API': None})
         
 
 if __name__ == '__main__':

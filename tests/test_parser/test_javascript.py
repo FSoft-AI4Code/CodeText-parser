@@ -76,8 +76,8 @@ class Test_JavascriptParser(unittest.TestCase):
     def test_get_function_metadata(self):
         root = self.root_node
         
-        function = JavascriptParser.get_function_list(root)[1]
-        metadata = JavascriptParser.get_function_metadata(function)
+        _function = JavascriptParser.get_function_list(root)[1]
+        metadata = JavascriptParser.get_function_metadata(_function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
@@ -104,11 +104,62 @@ class Test_JavascriptParser(unittest.TestCase):
         metadata = JavascriptParser.get_class_metadata(classes)
 
         self.assertEqual(metadata['identifier'], 'Model')
-        self.assertEqual(metadata['parameters'], ['Car'])
+        self.assertEqual(metadata['parameters'], {'Car': None})
 
     def test_extract_docstring(self):
         pass
         
+        
+    def test_metadata_with_arrow_function(self):
+        code_sample = '''
+            export const parseModel = async (mesh) =>
+                new Promise((resolve) => {
+                    exporter.parse(
+                        mesh,
+                        (gltf) => {
+                            const blob = new Blob([gltf], { type: "application/octet-stream" });
+                            resolve(blob);
+                            return blob;
+                        },
+                        (error) => {
+                            console.log(error);
+                            return error;
+
+                        }
+                    );
+                });        
+        '''
+        root = parse_code(code_sample, 'javascript').root_node
+        fn = JavascriptParser.get_function_list(root)[0]
+        metadata = JavascriptParser.get_function_metadata(fn)
+        
+        identifier = metadata['identifier']
+        self.assertEqual(identifier, 'parseModel')
+        
+    def test_metadata_with_undecleared_functions(self):
+        code_sample = """
+            const asyncFunctionExpression = async function() {
+                // async function expression definition
+                return a 
+            };
+            
+            const generatorFunctionExpression = function*() {
+                // generator function expression definition
+                return b
+            };        
+        """
+        root = parse_code(code_sample, 'javascript').root_node
+        fn1, fn2 = JavascriptParser.get_function_list(root)
+        
+        self.assertEqual(fn1.type, 'function') 
+        self.assertEqual(fn2.type, 'generator_function')
+        
+        metadata1 = JavascriptParser.get_function_metadata(fn1)
+        metadata2 = JavascriptParser.get_function_metadata(fn2)
+
+        self.assertEqual(metadata1['identifier'], 'asyncFunctionExpression')
+        self.assertEqual(metadata2['identifier'], 'generatorFunctionExpression')
+
 
 if __name__ == '__main__':
     unittest.main()

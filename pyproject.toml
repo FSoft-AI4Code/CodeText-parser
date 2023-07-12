@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codetext"
-version = "0.0.5"
+version = "0.0.7"
 authors = [
   { name="Dung Manh Nguyen", email="dungnm.workspace@gmail.com" },
 ]
@@ -21,8 +21,12 @@ dependencies = [
     "Levenshtein>=0.20",
     "langdetect>=1.0.0",
     "bs4>=0.0.1",
+    "tabulate>=0.9.0"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/AI4Code-Research/CodeText-data"
 "Bug Tracker" = "https://github.com/AI4Code-Research/CodeText-data/issues"
+
+[project.scripts]
+codetext = "codetext.__main__:main"

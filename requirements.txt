@@ -1,6 +1,6 @@
 # for preprocessing
 tree-sitter
-# docstring-parser
+tabulate
 Levenshtein
 langdetect
 bs4

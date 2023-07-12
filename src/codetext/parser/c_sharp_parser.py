@@ -131,10 +131,24 @@ class CsharpParser(LanguageParser):
                 for param_node in child.children:
                     param_nodes = get_node_by_kind(param_node, ['parameter'])
                     for param in param_nodes:
-                        param_type = get_node_text(param.children[0])
-                        param_identifier = get_node_text(param.children[1])
-                    
-                        metadata['parameters'][param_identifier] = param_type
+                        if len(param.children) > 1:
+                            param_type = get_node_text(param.children[0])
+                            param_name = get_node_text(param.children[1])
+                            metadata['parameters'][param_name] = param_type
+                        
+                        else:
+                            param_name = get_node_text(param.children[0])
+                            metadata['parameters'][param_name] = None
+                        # for node in param.children:
+                        #     if node.type in ['array_type', 'implicit_type', \
+                        #         'nullable_type', 'pointer_type', 'function_pointer_type', \
+                        #         'predefined_type', 'tuple_type']:
+                        #         param_type = get_node_text(node)
+                        #     elif node.type == 'identifier':
+                        #         param_identifier = get_node_text(node)
+                                
+                        # param_type = get_node_text(param.child_by_field_name('type'))
+                        # param_identifier = get_node_text(param.child_by_field_name('name'))
         return metadata
 
     @staticmethod
@@ -148,7 +162,7 @@ class CsharpParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': '',
+            'parameters': {},
         }
         assert type(class_node) == tree_sitter.Node
         
@@ -156,11 +170,11 @@ class CsharpParser(LanguageParser):
             if child.type == 'identifier':
                 metadata['identifier'] = get_node_text(child)
             elif child.type == 'base_list':
-                argument_list = []
                 for arg in child.children:
                     if arg.type == 'identifier':
-                        argument_list.append(get_node_text(arg))
-                metadata['parameters'] = argument_list
+                        metadata['parameters'][get_node_text(arg)] = None
+                        # argument_list.append(get_node_text(arg))
+                # metadata['parameters'] = argument_list
 
         return metadata
     

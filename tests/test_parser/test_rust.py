@@ -111,7 +111,7 @@ class Test_RustParser(unittest.TestCase):
         metadata = RustParser.get_class_metadata(classes)
         
         self.assertEqual(metadata['identifier'], 'Quack')
-        self.assertEqual(metadata['parameters'], ['Duck'])
+        self.assertEqual(metadata['parameters'], {'Duck': None})
         
 
 if __name__ == '__main__':

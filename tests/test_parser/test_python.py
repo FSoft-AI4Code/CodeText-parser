@@ -71,7 +71,7 @@ class Test_PythonParser(unittest.TestCase):
         classes = list(PythonParser.get_class_list(root))[0]
         metadata = PythonParser.get_class_metadata(classes)
 
-        self.assertEqual(metadata['parameters'], ['ABC'])
+        self.assertEqual(metadata['parameters'], {'ABC': None})
         self.assertEqual(metadata['identifier'], 'Sample')
         
     def test_get_comment_list(self):

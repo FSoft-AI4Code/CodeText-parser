@@ -83,7 +83,7 @@ class RubyParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': [],
+            'parameters': {},
             'return_type': None,
         }
         
@@ -96,7 +96,7 @@ class RubyParser(LanguageParser):
             elif child.type in ['method_parameters', 'parameters', 'bare_parameters']:
                 params = get_node_by_kind(child, ['identifier'])
                 for item in params:
-                    metadata['parameters'].append(get_node_text(item))
+                    metadata['parameters'][get_node_text(item)] = None
 
         if not metadata['return_type']:
             return_statement = get_node_by_kind(function_node, ['return'])
@@ -113,7 +113,7 @@ class RubyParser(LanguageParser):
             logger.info('From version `0.0.6` this function will update argument in the API')
         metadata = {
             'identifier': '',
-            'parameters': [],
+            'parameters': {},
         }
         
         assert type(class_node) == tree_sitter.Node
@@ -124,7 +124,7 @@ class RubyParser(LanguageParser):
             if child.type == 'superclass':
                 for subchild in child.children:
                     if subchild.type == 'constant':
-                        metadata['parameters'].append(get_node_text(subchild))
+                        metadata['parameters'][get_node_text(subchild)] = None
 
         return metadata
         
