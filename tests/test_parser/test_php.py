@@ -22,14 +22,14 @@ class Test_PhpParser(unittest.TestCase):
         
         function_list = PhpParser.get_function_list(root)
         
-        self.assertEqual(len(function_list), 3)
+        self.assertEqual(len(function_list), 5)
 
     def test_get_class_list(self):
         root = self.root_node
         
         class_list = PhpParser.get_class_list(root)
         
-        self.assertEqual(len(class_list), 1)
+        self.assertEqual(len(class_list), 3)
 
     def test_get_docstring(self):
         code_sample = """
@@ -104,11 +104,17 @@ class Test_PhpParser(unittest.TestCase):
     def test_get_class_metadata(self):
         root = self.root_node
         
-        classes = list(PhpParser.get_class_list(root))[0]
-        metadata = PhpParser.get_class_metadata(classes)
+        _class, interface, trait = list(PhpParser.get_class_list(root))
+        class_metadata = PhpParser.get_class_metadata(_class)
 
-        self.assertEqual(metadata['parameters'], {'AbstractSQLServerDriver': None})
-        self.assertEqual(metadata['identifier'], 'Driver')
+        self.assertEqual(class_metadata['parameters'], {'AbstractSQLServerDriver': None})
+        self.assertEqual(class_metadata['identifier'], 'Driver')
+        
+        interface_metadata = PhpParser.get_class_metadata(interface)
+        self.assertEqual(interface_metadata['identifier'], 'MyInterface')
+        
+        trait_metadata = PhpParser.get_class_metadata(trait)
+        self.assertEqual(trait_metadata['identifier'], 'MyTrait')
         
 
 if __name__ == '__main__':

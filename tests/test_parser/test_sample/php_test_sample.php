@@ -88,3 +88,25 @@ final class Driver extends AbstractSQLServerDriver
         return $connectionOptionsDsn;
     }
 }
+
+interface MyInterface {
+        public function myMethod() {
+            // Method implementation
+        }
+    
+}
+
+trait MyTrait {
+    
+        public function setBackgroundImage(Drawing $objDrawing): self
+        {
+            if (!array_key_exists($objDrawing->getType(), Drawing::IMAGE_TYPES_CONVERTION_MAP)) {
+                throw new PhpSpreadsheetException('Unsupported image type in comment background. Supported types: PNG, JPEG, BMP, GIF.');
+            }
+            $this->backgroundImage = $objDrawing;
+    
+            return $this;
+        }
+    
+}
+    

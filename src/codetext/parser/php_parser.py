@@ -49,7 +49,9 @@ class PhpParser(LanguageParser):
     
     @staticmethod
     def get_class_list(node):
-        res = get_node_by_kind(node, ['class_declaration', 'trait_declaration'])
+        res = get_node_by_kind(node, ['class_declaration', 
+                                      'trait_declaration',
+                                      'interface_declaration'])
         return res
     
     @staticmethod
