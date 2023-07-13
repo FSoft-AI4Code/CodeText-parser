@@ -22,7 +22,7 @@ class Test_RubyParser(unittest.TestCase):
         
         function_list = RubyParser.get_function_list(root)
         
-        self.assertEqual(len(function_list), 1)
+        self.assertEqual(len(function_list), 2)
 
     def test_get_class_list(self):
         root = self.root_node
@@ -76,14 +76,22 @@ class Test_RubyParser(unittest.TestCase):
     def test_get_function_metadata(self):
         root = self.root_node
         
-        function = RubyParser.get_function_list(root)[0]
-        metadata = RubyParser.get_function_metadata(function)
+        _function = RubyParser.get_function_list(root)[0]
+        metadata = RubyParser.get_function_metadata(_function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'search')
         self.assertEqual(metadata['parameters'], {'query': None, 'options': None})
         self.assertEqual(metadata['return_type'], None)
+        
+        _singleton = RubyParser.get_function_list(root)[1]
+        metadata = RubyParser.get_function_metadata(_singleton)
+        for key in ['identifier', 'parameters', 'return_type']:
+                    self.assertTrue(key in metadata.keys())
+        self.assertEqual(metadata['identifier'], 'my_method')
+        self.assertEqual(metadata['parameters'], {'a': None})
+        self.assertEqual(metadata['return_type'], '<not_specific>')
         
     
     def test_metadata_without_return_statement(self):

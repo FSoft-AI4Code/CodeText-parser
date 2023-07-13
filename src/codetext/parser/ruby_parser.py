@@ -20,7 +20,8 @@ class RubyParser(LanguageParser):
 
     @staticmethod
     def get_function_list(node):
-        res = get_node_by_kind(node, ['method'])
+        res = get_node_by_kind(node, ['method',
+                                      'singleton_method'])
         return res
     
     @staticmethod
@@ -88,7 +89,7 @@ class RubyParser(LanguageParser):
         }
         
         assert type(function_node) == tree_sitter.Node
-        assert function_node.type == 'method'
+        assert function_node.type in ['method', 'singleton_method']
         
         for child in function_node.children:
             if child.type == 'identifier':

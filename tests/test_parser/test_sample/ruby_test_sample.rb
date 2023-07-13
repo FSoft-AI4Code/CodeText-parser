@@ -32,6 +32,12 @@ module RedditKit
 
             objects_from_response(:get, path, parameters)
         end
+
+        def self.my_method(a)
+            # Method implementation
+            puts(a)
+            return a
+        end
     
     end
   end
