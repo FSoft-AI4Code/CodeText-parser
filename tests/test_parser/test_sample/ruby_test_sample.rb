@@ -42,4 +42,44 @@ module RedditKit
     end
   end
 end
+
+load_current_value do |new_resource, old_resource|
+    unless current_installed_version(new_resource).nil?
+      version(current_installed_version(new_resource))
+      Chef::Log.debug("Current version is #{version}") if version
+      return a
+    end
+  end
+  
+  action :install  do
+    build_essential
+  
+    install_version = new_resource.version unless new_resource.version.nil? || new_resource.version == current_resource.version
+    versions_match = candidate_version == current_installed_version(new_resource)
+  
+    if install_version || new_resource.version.nil? && !versions_match
+      converge_by("install package #{new_resource.package_name} #{install_version}") do
+        info_output = "Installing #{new_resource.package_name}"
+        info_output << " version #{install_version}" if install_version && !install_version.empty?
+        Chef::Log.info(info_output)
+        install_package(new_resource.package_name, install_version)
+      end
+    end
+  end
+  
+  action :reinstall do
+    build_essential
+    
+    install_version = new_resource.version unless new_resource.version.nil?
+    converge_by("reinstall package #{new_resource.package_name} #{install_version}") do
+      info_output = "Installing #{new_resource.package_name}"
+      info_output << " version #{install_version}" if install_version && !install_version.empty?
+      Chef::Log.info(info_output)
+      install_package(new_resource.package_name, install_version, force: true)
+    end
+  end
+
+a = 1
+
+reinstall
     

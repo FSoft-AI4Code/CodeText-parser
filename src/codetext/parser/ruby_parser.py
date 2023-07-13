@@ -134,3 +134,39 @@ class RubyParser(LanguageParser):
     def get_comment_node(function_node):
         comment_node = get_node_by_kind(function_node, kind='comment')
         return comment_node
+    
+    @staticmethod
+    def get_action_list(action_node):
+        call_nodes =  get_node_by_kind(action_node, ['call'])
+        res = []
+        for call_node in call_nodes:
+            if get_node_by_kind(call_node, ["do_block"]):
+                res.append(call_node)
+        # print(res)
+        return res
+    
+    @staticmethod
+    def get_action_metadata(action_node):
+        metadata = {
+            'identifier': '',
+            'parameters': {},
+            'return_type': None,
+        }
+        
+        for child in action_node.children:
+            if child.type in ["identifier"]:
+                metadata['identifier'] = get_node_text(child)
+            if child.type in ["argument_list"]:
+                symbol =  get_node_by_kind(child, ["simple_symbol"])
+                if symbol:
+                    metadata['identifier'] += get_node_text(symbol[0])
+        
+        parameters =  get_node_by_kind(action_node, ["block_parameters"])
+        
+        if parameters:
+            for param in get_node_by_kind(parameters[0], ["identifier"]):
+                param_name = get_node_text(param)
+                metadata['parameters'].update({param_name : None})
+        
+        return metadata
+    
