@@ -27,7 +27,6 @@ class Test_PythonParser(unittest.TestCase):
         root = self.root_node
         
         class_list = PythonParser.get_class_list(root)
-        
         self.assertEqual(len(class_list), 1)
 
     def test_get_docstring(self):
@@ -59,7 +58,7 @@ class Test_PythonParser(unittest.TestCase):
 
     def test_get_class_metadata(self):
         code_sample = '''
-        class ABC()
+        class ABC():
             pass
             
         class Sample(ABC):
@@ -69,7 +68,7 @@ class Test_PythonParser(unittest.TestCase):
             def test_sample(self, arg1: str = "string", arg2 = "another_string"):
                 return NotImplement()
         
-        class DEF(ABC, Sample):
+        class ThisIsalsoAclass(ABC, Sample):
             pass
         '''
         root = parse_code(code_sample, 'python').root_node
@@ -89,8 +88,8 @@ class Test_PythonParser(unittest.TestCase):
         
         
         metadata = PythonParser.get_class_metadata(classes[2])
-        self.assertEqual(metadata['parameters'], [{'ABC': None}, {'Sample': None}])
-        self.assertEqual(metadata['identifier'], 'DEF')
+        self.assertEqual(metadata['parameters'], {'ABC': None, 'Sample': None})
+        self.assertEqual(metadata['identifier'], 'ThisIsalsoAclass')
         
         
         
