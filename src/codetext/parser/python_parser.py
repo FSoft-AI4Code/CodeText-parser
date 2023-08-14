@@ -114,7 +114,9 @@ class PythonParser(LanguageParser):
                 argument_list = get_node_text(child).split(',')
                 for arg in argument_list:
                     item = re.sub(r'[^a-zA-Z0-9\_]', ' ', arg).split()
-                    metadata['parameters'][item[0].strip()] = None
+                    # Handle class definitions with empty argument list class ABC()
+                    if len(item) > 0:
+                        metadata['parameters'][item[0].strip()] = None
 
         # get __init__ function
         return metadata
