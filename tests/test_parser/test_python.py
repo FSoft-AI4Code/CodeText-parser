@@ -59,20 +59,40 @@ class Test_PythonParser(unittest.TestCase):
 
     def test_get_class_metadata(self):
         code_sample = '''
+        class ABC()
+            pass
+            
         class Sample(ABC):
             def __init__(self):
                 pass
 
             def test_sample(self, arg1: str = "string", arg2 = "another_string"):
                 return NotImplement()
+        
+        class DEF(ABC, Sample):
+            pass
         '''
         root = parse_code(code_sample, 'python').root_node
         
-        classes = list(PythonParser.get_class_list(root))[0]
-        metadata = PythonParser.get_class_metadata(classes)
-
+        
+        classes = list(PythonParser.get_class_list(root))
+        self.assertEqual(len(classes), 3)
+        
+        metadata = PythonParser.get_class_metadata(classes[0])
+        self.assertEqual(metadata['parameters'], {})
+        self.assertEqual(metadata['identifier'], 'ABC')
+        
+        
+        metadata = PythonParser.get_class_metadata(classes[1])
         self.assertEqual(metadata['parameters'], {'ABC': None})
         self.assertEqual(metadata['identifier'], 'Sample')
+        
+        
+        metadata = PythonParser.get_class_metadata(classes[2])
+        self.assertEqual(metadata['parameters'], [{'ABC': None}, {'Sample': None}])
+        self.assertEqual(metadata['identifier'], 'DEF')
+        
+        
         
     def test_get_comment_list(self):
         root = self.root_node
