@@ -125,6 +125,10 @@ class JavaParser(LanguageParser):
                 metadata['identifier'] = get_node_text(child)    
             elif child.type in return_kinds:
                 metadata['return_type'] = get_node_text(child)
+            elif child.type == 'throws':
+                for subchild in child.children:
+                    if 'identifier' in subchild.type:
+                        metadata['throws'] = get_node_text(subchild)
             elif child.type == 'formal_parameters':
                 param_list = get_node_by_kind(child, ['formal_parameter'])  # speed_parameter
                 for param in param_list:
