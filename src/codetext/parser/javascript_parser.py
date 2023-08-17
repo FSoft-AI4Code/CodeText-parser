@@ -48,7 +48,12 @@ class JavascriptParser(LanguageParser):
     
     @staticmethod
     def get_function_list(node):
-        function_types = ['function_declaration', 'function', 'method_definition', 'generator_function_declaration']
+        function_types = ['function_declaration',
+                    'function',
+                    'method_definition',
+                    'generator_function_declaration',
+                    'arrow_function',
+                    'generator_function']
         res = get_node_by_kind(node, function_types)
         for node in res[:]:
             if not node.children:
@@ -87,6 +92,16 @@ class JavascriptParser(LanguageParser):
         return_statement = get_node_by_kind(function_node, ['return_statement'])
         if len(return_statement) > 0:
             metadata['return_type'] = '<not_specific>'
+            
+        if function_node.type in ["function",
+                                  "arrow_function",
+                                  "generator_function"]:
+            # function inside object property or variable declarator
+            identifier = function_node.prev_named_sibling
+            if identifier:
+                if identifier.type in ["identifier"]:
+                    metadata["identifier"] = identifier.text.decode()
+        
         return metadata
 
     @staticmethod

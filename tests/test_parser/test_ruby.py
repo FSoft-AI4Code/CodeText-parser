@@ -22,7 +22,7 @@ class Test_RubyParser(unittest.TestCase):
         
         function_list = RubyParser.get_function_list(root)
         
-        self.assertEqual(len(function_list), 1)
+        self.assertEqual(len(function_list), 2)
 
     def test_get_class_list(self):
         root = self.root_node
@@ -76,14 +76,22 @@ class Test_RubyParser(unittest.TestCase):
     def test_get_function_metadata(self):
         root = self.root_node
         
-        function = RubyParser.get_function_list(root)[0]
-        metadata = RubyParser.get_function_metadata(function)
+        _function = RubyParser.get_function_list(root)[0]
+        metadata = RubyParser.get_function_metadata(_function)
 
         for key in ['identifier', 'parameters', 'return_type']:
             self.assertTrue(key in metadata.keys())
         self.assertEqual(metadata['identifier'], 'search')
         self.assertEqual(metadata['parameters'], {'query': None, 'options': None})
         self.assertEqual(metadata['return_type'], None)
+        
+        _singleton = RubyParser.get_function_list(root)[1]
+        metadata = RubyParser.get_function_metadata(_singleton)
+        for key in ['identifier', 'parameters', 'return_type']:
+                    self.assertTrue(key in metadata.keys())
+        self.assertEqual(metadata['identifier'], 'my_method')
+        self.assertEqual(metadata['parameters'], {'a': None})
+        self.assertEqual(metadata['return_type'], '<not_specific>')
         
     
     def test_metadata_without_return_statement(self):
@@ -114,6 +122,26 @@ class Test_RubyParser(unittest.TestCase):
         self.assertEqual(metadata['identifier'], 'Client')
         self.assertEqual(metadata['parameters'], {'API': None})
         
+    def test_get_action_list(self):
+        root = self.root_node
+        actions  = RubyParser.get_action_list(root)
+        
+        self.assertEqual(len(actions), 5)
+    
+    def test_get_action_metadata(self):
+        root = self.root_node
+        actions  = RubyParser.get_action_list(root)
+        metadatas = [ RubyParser.get_action_metadata(action) for action in actions]
+        self.assertEqual(metadatas[0]["identifier"], "load_current_value")      
+        self.assertEqual(metadatas[1]["identifier"], "action:install")
+        self.assertEqual(metadatas[2]["identifier"], "converge_by")
+
+        self.assertEqual(metadatas[3]["identifier"], "action:reinstall")
+        self.assertEqual(metadatas[4]["identifier"], "converge_by")
+
+        self.assertEqual(metadatas[0]["parameters"]["new_resource"], None)
+        self.assertEqual(metadatas[0]["parameters"]["old_resource"], None)
+
 
 if __name__ == '__main__':
     unittest.main()
