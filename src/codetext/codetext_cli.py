@@ -53,15 +53,15 @@ def parse_file(file_path: str, language: str = None, verbose: bool = False) -> L
         cls_info["code"] = get_node_text(_cls)
 
         cls_method = []
-        method_list = parser.get_function_list(_cls)
-        for method in method_list:
+        current_class_methods = parser.get_function_list(_cls)
+        for method in current_class_methods:
             method_info = parser.get_function_metadata(method)
             method_info['code'] = get_node_text(method)
             cls_method.append(method_info)
 
         cls_info["method"] = cls_method
         cls_metadata.append(cls_info)
-        method_list.extend(method_list)
+        method_list.extend(current_class_methods)
 
     fn_list: List = parser.get_function_list(root_node)
     for node in fn_list[:]:
