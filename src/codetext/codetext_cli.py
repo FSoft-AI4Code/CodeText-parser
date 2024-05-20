@@ -53,14 +53,15 @@ def parse_file(file_path: str, language: str = None, verbose: bool = False) -> L
         cls_info["code"] = get_node_text(_cls)
 
         cls_method = []
-        method_list = parser.get_function_list(_cls)
-        for method in method_list:
+        current_class_methods = parser.get_function_list(_cls)
+        for method in current_class_methods:
             method_info = parser.get_function_metadata(method)
+            method_info['code'] = get_node_text(method)
             cls_method.append(method_info)
 
         cls_info["method"] = cls_method
         cls_metadata.append(cls_info)
-        method_list.extend(method_list)
+        method_list.extend(current_class_methods)
 
     fn_list: List = parser.get_function_list(root_node)
     for node in fn_list[:]:
@@ -88,7 +89,8 @@ def print_result(res: Dict, file_name: str = "no_name_file"):
 
     # ========= Print class & method =========
     cls_headers = ["#", "Class", "Arguments"]
-    cls_method_headers = ["#", "Method name", "Paramters", "Type", "Return type"]
+    cls_method_headers = ["#", "Method name", "Paramters", 
+                          "Type", "Return type", "Throws"]
     cls_info = []
     method_info = {}
     for cls_idx, _cls in enumerate(res["class"]):
@@ -114,6 +116,11 @@ def print_result(res: Dict, file_name: str = "no_name_file"):
                 sublist[4] = (
                     method["return_type"]
                     if i <= 1 and method["return_type"] != "<not_specific>"
+                    else ""
+                )
+                sublist[5] = (
+                    method["throws"]
+                    if i <= 1 and "throws" in method.keys()
                     else ""
                 )
                 _method_info.append(sublist)

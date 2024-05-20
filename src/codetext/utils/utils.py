@@ -102,7 +102,10 @@ def parse_code(raw_code: str, language: str='Auto', tree_sitter_path: str=None) 
     parser.set_language(language)
     
     if isinstance(raw_code, str):
-        tree = parser.parse(bytes(raw_code, 'utf8'))
-        return tree
+        raw_code = bytes(raw_code, 'utf8')
+    elif isinstance(raw_code, bytes):
+        pass
     else:
         raise ValueError(f"Expect `str`, got {type(raw_code)}")
+    tree = parser.parse(raw_code)
+    return tree

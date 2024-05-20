@@ -85,3 +85,13 @@ Release data: Jul 5, 2023
 * Update all class extractor format (using dict instead of list)
 * Fix missing identifier, parameter in C, C#, Java parser
 * Implement CLI
+
+Version 0.0.8
+=============
+Release data: Aug 17, 2023
+
+* Update format codetext_cli
+* Update PythonParser: Handle class definitions with empty argument list class ABC()
+* Add Javascript undeclared functions
+* Add PHP interface
+* Add Ruby actions with block parameters
