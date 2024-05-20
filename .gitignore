@@ -11,4 +11,5 @@ src/codetext.egg-info/*
 *.pyc
 *.so
 *.whl
-
+.idea
+.vscode*.iml
