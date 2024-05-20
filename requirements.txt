@@ -4,3 +4,4 @@ tabulate
 Levenshtein
 langdetect
 bs4
+tree-sitter-languages
