@@ -104,7 +104,7 @@ def parse_code(raw_code: str, language: str='Auto', tree_sitter_path: str=None) 
         if not os.path.exists(ts_lang_path):
             logger.warning(f"Not found `{language}.so` in `{load_path}/tree-sitter/`, attemp to build language")
             build_language(language, load_path)    
-    language = Language(load_path + f"/tree-sitter/{language}.so", language)
+        language = Language(load_path + f"/tree-sitter/{language}.so", language)
     parser.set_language(language)
     
     if isinstance(raw_code, str):
