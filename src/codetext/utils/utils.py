@@ -92,15 +92,21 @@ def parse_code(raw_code: str, language: str='Auto', tree_sitter_path: str=None) 
         calling_script_path = Path(inspect.getframeinfo(sys._getframe(1)).filename)
         load_path = str(calling_script_path.parent)
 
-    ts_lang_path = os.path.join(load_path, 'tree-sitter', f'{language}.so')
-    if not os.path.exists(ts_lang_path):
-        logger.warning(f"Not found `{language}.so` in `{load_path}/tree-sitter/`, attemp to build language")
-        build_language(language, load_path)
-        
+    # Get parser from languages
     parser = Parser()
-    language = Language(load_path + f"/tree-sitter/{language}.so", language)
-    parser.set_language(language)
-    
+    try:
+        from tree_sitter_languages import get_language, get_parser
+        parser = get_parser(get_language(language))
+    except ImportError:
+        # Work-around when pre-built binaries wheels for tree-sitter-languages are not available
+        logger.warning(f"Troubled importing 'tree-sitter-languages', attemp to look for pre-built binaries in the workspace")    
+        ts_lang_path = os.path.join(load_path, 'tree-sitter', f'{language}.so')
+        if not os.path.exists(ts_lang_path):
+            logger.warning(f"Not found `{language}.so` in `{load_path}/tree-sitter/`, attemp to build language")
+            build_language(language, load_path)    
+        language = Language(load_path + f"/tree-sitter/{language}.so", language)
+        parser.set_language(language)
+        
     if isinstance(raw_code, str):
         raw_code = bytes(raw_code, 'utf8')
     elif isinstance(raw_code, bytes):

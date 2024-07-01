@@ -14,8 +14,6 @@ class Test_Utils(unittest.TestCase):
         def sum_2_num(a, b):
             return a + b
         """
-        
-        build_language(language='python')
         parse_code(sample, 'python')
     
 
