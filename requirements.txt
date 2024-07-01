@@ -1,6 +1,7 @@
 # for preprocessing
-tree-sitter
+tree-sitter==0.20.4
 tabulate
 Levenshtein
 langdetect
 bs4
+tree_sitter_languages==1.10.2
